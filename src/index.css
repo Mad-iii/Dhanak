@@ -1,0 +1,95 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cinzel+Decorative:wght@400;700;900&family=Space+Grotesk:wght@300..700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap');
+
+@theme {
+  --color-brand-magenta: #FF0080;
+  --color-brand-yellow: #FFE600;
+  --color-brand-turquoise: #00C2C7;
+  --color-brand-coral: #FF4D1C;
+  --color-brand-ivory: #FFF8EE;
+  --color-brand-black: #1A0A00;
+
+  --font-display: "Cinzel Decorative", "Playfair Display", serif;
+  --font-heading: "Bodoni Moda", "Playfair Display", serif;
+  --font-palmor: "Bodoni Moda", serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-mono: "Space Grotesk", sans-serif;
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-shimmer: shimmer 2s infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+}
+
+@layer base {
+  h1, h2, h3, .font-palmor {
+    -webkit-text-stroke: 1px currentColor;
+    paint-order: stroke fill;
+  }
+
+  .text-shadow-rituals {
+    text-shadow: 4px 4px 0px rgba(255, 0, 128, 0.4), 8px 8px 0px rgba(0, 194, 199, 0.2);
+  }
+
+  body {
+    @apply bg-brand-ivory text-brand-black font-body relative cursor-none;
+  }
+
+  /* Grain Texture Overlay */
+  .grain {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200%;
+    background: transparent url('http://assets.iceable.com/img/noise-transparent.png') repeat;
+    background-size: 100px 100px;
+    animation: grain 8s steps(10) infinite;
+    z-index: 9999;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  @keyframes grain {
+    0%, 100% { transform:translate(0, 0) }
+    10% { transform:translate(-5%, -10%) }
+    20% { transform:translate(-15%, 5%) }
+    30% { transform:translate(7%, -25%) }
+    40% { transform:translate(-5%, 25%) }
+    50% { transform:translate(-15%, 10%) }
+    60% { transform:translate(15%, 0) }
+    70% { transform:translate(0, 15%) }
+    80% { transform:translate(3%, 35%) }
+    90% { transform:translate(-10%, 10%) }
+  }
+
+  /* Remove default scrollbar */
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+
+  /* No horizontal scroll on body */
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .marquee-content {
+    @apply flex whitespace-nowrap animate-marquee;
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-linear-to-r before:from-transparent before:via-white/20 before:to-transparent;
+  }
+}

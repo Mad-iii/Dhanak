@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    
+    function isValidReview(data) {
+      return data.keys().hasAll(['productId', 'userName', 'rating', 'text', 'createdAt'])
+        && data.keys().size() == 5
+        && data.productId is string && data.productId.size() <= 100
+        && data.userName is string && data.userName.size() > 0 && data.userName.size() <= 100
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.text is string && data.text.size() > 0 && data.text.size() <= 2000
+        && data.createdAt == request.time;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isValidReview(incoming());
+      allow update, delete: if false;
+    }
+  }
+}
