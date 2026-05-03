@@ -188,7 +188,7 @@ export const Checkout = () => {
                         items: cart.map(i => ({
                             name: i.name,
                             quantity: i.quantity,
-                            price: i.price,
+                            price: parseFloat(String(i.price).replace(/,/g, "")),
                         })),
                     },
                 }),
