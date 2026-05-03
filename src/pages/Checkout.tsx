@@ -57,7 +57,7 @@ export const Checkout = () => {
         if (!formData.lastName.trim()) newErrors.lastName = 'Last name is essential.';
         if (!formData.address.trim()) newErrors.address = 'Where shall we send the ritual?';
         if (!formData.city.trim()) newErrors.city = 'City is required.';
-        
+
         // Pakistani Phone Validation
         // Common formats: 03xxxxxxxxx, +923xxxxxxxxx, 923xxxxxxxxx
         const phoneRegex = /^((\+92)|(0092)|(92))?3[0-9]{9}$|^03[0-9]{9}$/;
@@ -87,7 +87,7 @@ export const Checkout = () => {
             total: finalTotal,
             payment: paymentMethod
         };
-        
+
         console.log(`%c[SYSTEM] EMAIL SENT TO: mahdsadiq360@gmail.com`, 'color: #FF0080; font-weight: bold; font-size: 14px;');
         console.log('Order Details:', orderDetails);
     };
@@ -109,7 +109,7 @@ export const Checkout = () => {
                 body: JSON.stringify({ amount: finalTotal })
             });
             const data = await response.json();
-            
+
             if (!data.success) throw new Error(data.error);
 
             // Simulate mobile app notification push
@@ -145,7 +145,7 @@ export const Checkout = () => {
                 return;
             }
             setIsProcessing(true);
-            
+
             try {
                 // Initialize Safepay for the card transaction
                 const response = await fetch('/api/payment/init', {
@@ -169,6 +169,31 @@ export const Checkout = () => {
             }
         } else if (paymentMethod === 'cod') {
             handleEmailNotification();
+
+            // Send to portal
+            fetch(`${import.meta.env.VITE_PORTAL_URL}/api/ingest`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-ingest-secret": import.meta.env.VITE_INGEST_SECRET,
+                },
+                body: JSON.stringify({
+                    type: "ORDER_CREATED",
+                    storeId: import.meta.env.VITE_STORE_ID,
+                    data: {
+                        orderNumber: `DHANAK-${Date.now()}`,
+                        total: finalTotal,
+                        customerName: `${formData.firstName} ${formData.lastName}`,
+                        customerEmail: undefined,
+                        items: cart.map(i => ({
+                            name: i.name,
+                            quantity: i.quantity,
+                            price: i.price,
+                        })),
+                    },
+                }),
+            }).catch(() => { });
+
             setStep(3);
         }
     };
@@ -209,66 +234,66 @@ export const Checkout = () => {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="flex flex-col gap-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">First Name *</label>
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     name="firstName"
                                                     value={formData.firstName}
                                                     onChange={handleInputChange}
-                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.firstName ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`} 
-                                                    placeholder="E.g. Zoya" 
+                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.firstName ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`}
+                                                    placeholder="E.g. Zoya"
                                                 />
                                                 {errors.firstName && <span className="text-[10px] font-bold text-brand-magenta uppercase tracking-tighter">{errors.firstName}</span>}
                                             </div>
                                             <div className="flex flex-col gap-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">Last Name *</label>
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     name="lastName"
                                                     value={formData.lastName}
                                                     onChange={handleInputChange}
-                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.lastName ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`} 
-                                                    placeholder="E.g. Ali" 
+                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.lastName ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`}
+                                                    placeholder="E.g. Ali"
                                                 />
                                                 {errors.lastName && <span className="text-[10px] font-bold text-brand-magenta uppercase tracking-tighter">{errors.lastName}</span>}
                                             </div>
                                             <div className="sm:col-span-2 flex flex-col gap-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">Shipping Address *</label>
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     name="address"
                                                     value={formData.address}
                                                     onChange={handleInputChange}
-                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.address ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`} 
-                                                    placeholder="Street, Haveli, House #" 
+                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.address ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`}
+                                                    placeholder="Street, Haveli, House #"
                                                 />
                                                 {errors.address && <span className="text-[10px] font-bold text-brand-magenta uppercase tracking-tighter">{errors.address}</span>}
                                             </div>
                                             <div className="flex flex-col gap-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">City *</label>
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     name="city"
                                                     value={formData.city}
                                                     onChange={handleInputChange}
-                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.city ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`} 
-                                                    placeholder="E.g. Lahore" 
+                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.city ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`}
+                                                    placeholder="E.g. Lahore"
                                                 />
                                                 {errors.city && <span className="text-[10px] font-bold text-brand-magenta uppercase tracking-tighter">{errors.city}</span>}
                                             </div>
                                             <div className="flex flex-col gap-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">Phone Number *</label>
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleInputChange}
-                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.phone ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`} 
-                                                    placeholder="03XX XXXXXXX" 
+                                                    className={`border-2 p-4 focus:outline-none focus:border-brand-magenta font-bold transition-colors ${errors.phone ? 'border-brand-magenta bg-brand-magenta/5' : 'border-brand-black'}`}
+                                                    placeholder="03XX XXXXXXX"
                                                 />
                                                 {errors.phone && <span className="text-[10px] font-bold text-brand-magenta uppercase tracking-tighter">{errors.phone}</span>}
                                             </div>
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={proceedToPayment}
                                             className="w-full bg-brand-black text-white py-6 text-sm font-black uppercase tracking-[0.3em] hover:bg-brand-magenta shadow-[8px_8px_0px_#FFE600] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                                         >
@@ -294,7 +319,7 @@ export const Checkout = () => {
                                                 { id: 'bank', name: 'ONLINE BANKING', icon: ShieldCheck },
                                                 { id: 'cod', name: 'CASH ON DELIVERY', icon: Truck }
                                             ].map(m => (
-                                                <button 
+                                                <button
                                                     key={m.id}
                                                     onClick={() => {
                                                         setPaymentMethod(m.id as any);
@@ -313,34 +338,34 @@ export const Checkout = () => {
                                                 <div className="space-y-6 animate-in fade-in duration-500">
                                                     <div className="flex flex-col gap-2">
                                                         <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">Card Number</label>
-                                                        <input 
+                                                        <input
                                                             name="cardNumber"
                                                             value={formData.cardNumber}
                                                             onChange={handleInputChange}
-                                                            className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-mono font-bold tracking-[0.2em]" 
-                                                            placeholder="XXXX XXXX XXXX XXXX" 
+                                                            className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-mono font-bold tracking-[0.2em]"
+                                                            placeholder="XXXX XXXX XXXX XXXX"
                                                         />
                                                         {errors.cardNumber && <span className="text-[10px] font-bold text-brand-magenta uppercase">{errors.cardNumber}</span>}
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div className="flex flex-col gap-2">
                                                             <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">Expiry Date</label>
-                                                            <input 
+                                                            <input
                                                                 name="expiry"
                                                                 value={formData.expiry}
                                                                 onChange={handleInputChange}
-                                                                className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-bold" 
-                                                                placeholder="MM / YY" 
+                                                                className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-bold"
+                                                                placeholder="MM / YY"
                                                             />
                                                         </div>
                                                         <div className="flex flex-col gap-2">
                                                             <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">CVC</label>
-                                                            <input 
+                                                            <input
                                                                 name="cvc"
                                                                 value={formData.cvc}
                                                                 onChange={handleInputChange}
-                                                                className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-bold" 
-                                                                placeholder="123" 
+                                                                className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-bold"
+                                                                placeholder="123"
                                                             />
                                                         </div>
                                                     </div>
@@ -354,12 +379,12 @@ export const Checkout = () => {
                                                             <p className="text-sm font-bold opacity-60">Enter your account number to receive a payment notification in your banking app.</p>
                                                             <div className="flex flex-col gap-2">
                                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">Account Number</label>
-                                                                <input 
+                                                                <input
                                                                     name="accountNumber"
                                                                     value={formData.accountNumber}
                                                                     onChange={handleInputChange}
-                                                                    className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-mono font-bold text-xl" 
-                                                                    placeholder="0000000000" 
+                                                                    className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-mono font-bold text-xl"
+                                                                    placeholder="0000000000"
                                                                 />
                                                                 {errors.accountNumber && <span className="text-[10px] font-bold text-brand-magenta uppercase">{errors.accountNumber}</span>}
                                                             </div>
@@ -381,12 +406,12 @@ export const Checkout = () => {
                                                             </div>
                                                             <div className="flex flex-col gap-2">
                                                                 <label className="text-[10px] font-black uppercase tracking-widest text-brand-black/60">OTP CODE</label>
-                                                                <input 
+                                                                <input
                                                                     name="otp"
                                                                     value={formData.otp}
                                                                     onChange={handleInputChange}
-                                                                    className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-mono font-black text-3xl text-center tracking-[0.5em]" 
-                                                                    placeholder="0000" 
+                                                                    className="border-2 border-brand-black p-4 focus:outline-none focus:border-brand-magenta font-mono font-black text-3xl text-center tracking-[0.5em]"
+                                                                    placeholder="0000"
                                                                 />
                                                                 {errors.otp && <span className="text-[10px] font-bold text-brand-magenta uppercase">{errors.otp}</span>}
                                                             </div>
@@ -404,19 +429,19 @@ export const Checkout = () => {
                                         </div>
 
                                         <div className="flex gap-4">
-                                            <button 
+                                            <button
                                                 disabled={isProcessing}
                                                 onClick={() => {
                                                     if (bankStep > 1 && paymentMethod === 'bank') setBankStep(b => b - 1);
                                                     else setStep(1);
-                                                }} 
+                                                }}
                                                 className="flex-1 border-2 border-brand-black py-6 text-xs font-black uppercase tracking-widest hover:bg-brand-ivory disabled:opacity-50"
                                             >
                                                 Back
                                             </button>
-                                            
+
                                             {paymentMethod === 'bank' && bankStep === 1 && (
-                                                <button 
+                                                <button
                                                     onClick={handleOnlineBanking}
                                                     className="bg-brand-magenta text-white flex-[2] py-6 text-sm font-black uppercase tracking-[0.4em] shadow-[6px_6px_0px_#1A0A00] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
                                                 >
@@ -425,7 +450,7 @@ export const Checkout = () => {
                                             )}
 
                                             {paymentMethod === 'bank' && bankStep === 3 && (
-                                                <button 
+                                                <button
                                                     disabled={isProcessing}
                                                     onClick={handleOTPAndFinish}
                                                     className="bg-brand-black text-white flex-[2] py-6 text-sm font-black uppercase tracking-[0.4em] shadow-[6px_6px_0px_#FFE600] disabled:opacity-50 transition-all"
@@ -435,9 +460,9 @@ export const Checkout = () => {
                                             )}
 
                                             {(paymentMethod === 'card' || paymentMethod === 'cod') && (
-                                                <button 
+                                                <button
                                                     disabled={isProcessing}
-                                                    onClick={handleFinalPurchase} 
+                                                    onClick={handleFinalPurchase}
                                                     className="bg-brand-black text-white flex-[2] py-6 text-sm font-black uppercase tracking-[0.4em] shadow-[6px_6px_0px_#FFE600] border-2 border-brand-black hover:bg-brand-magenta disabled:opacity-50 transition-all"
                                                 >
                                                     {isProcessing ? 'Processing...' : 'Seal the Deal'}
@@ -454,7 +479,7 @@ export const Checkout = () => {
                                         </div>
                                         <h3 className="text-5xl font-display font-black italic mb-6">Rainbow Claimed!</h3>
                                         <p className="text-xl font-bold mb-12 max-w-sm mx-auto">Your order #7712 is being prepared with heritage and soul. See you soon in the circle.</p>
-                                        <button 
+                                        <button
                                             onClick={() => navigate('/')}
                                             className="inline-block bg-brand-black text-white px-12 py-6 text-sm font-black uppercase tracking-[0.3em] hover:bg-brand-turquoise transition-all shadow-[10px_10px_0px_#FF0080] active:shadow-none active:translate-x-1 active:translate-y-1 cursor-pointer"
                                         >
@@ -466,7 +491,7 @@ export const Checkout = () => {
                         </div>
 
                         <div className="md:col-span-4">
-                             <div className="bg-brand-black text-brand-ivory p-8 border-4 border-brand-turquoise sticky top-32">
+                            <div className="bg-brand-black text-brand-ivory p-8 border-4 border-brand-turquoise sticky top-32">
                                 <h4 className="text-xs font-black uppercase tracking-[0.4em] mb-8 border-b border-white/20 pb-4">Manifest</h4>
                                 <div className="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {cart.map(item => (
@@ -490,7 +515,7 @@ export const Checkout = () => {
                                     <span>Total</span>
                                     <span className="text-brand-yellow italic underline decoration-brand-magenta decoration-4 underline-offset-4">PKR {formattedTotal}</span>
                                 </div>
-                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
