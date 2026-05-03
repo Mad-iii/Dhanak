@@ -57,7 +57,7 @@ const Hero = () => {
                 initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                src="/Img/Hero_Model.png" 
+                src="/Hero_Model.png" 
                 alt="Dhanak Jewel Model" 
                 className="w-full h-full object-contain relative z-10 drop-shadow-[20px_20px_0px_#FF0080] md:drop-shadow-[40px_40px_0px_#FF0080]"
               />
@@ -118,7 +118,7 @@ const FeaturedProducts = () => {
                             initial={{ opacity: 0, x: 50 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true, amount: 0.1 }}
-                            src="/Img/Catalogue_Model.jpg" 
+                            src="/Catalogue_Model.png" 
                             alt="Catalogue Model" 
                             className="w-full h-full object-contain transition-all duration-1000"
                         />
