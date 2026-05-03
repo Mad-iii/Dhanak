@@ -1,5 +1,5 @@
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform, Raycast, Vec2 } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type GL = Renderer['gl'];
 
@@ -671,14 +671,20 @@ class App {
   }
 
   createRenderer() {
-    this.renderer = new Renderer({
-      alpha: true,
-      antialias: true,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
-    });
-    this.gl = this.renderer.gl;
-    this.gl.clearColor(0, 0, 0, 0);
-    this.container.appendChild(this.renderer.gl.canvas as HTMLCanvasElement);
+    try {
+      this.renderer = new Renderer({
+        alpha: true,
+        antialias: true,
+        dpr: Math.min(window.devicePixelRatio || 1, 2)
+      });
+      this.gl = this.renderer.gl;
+      if (!this.gl) throw new Error('WebGL context could not be created');
+      this.gl.clearColor(0, 0, 0, 0);
+      this.container.appendChild(this.renderer.gl.canvas as HTMLCanvasElement);
+    } catch (e) {
+      console.error('Renderer creation failed:', e);
+      throw e; // Re-throw to be caught by constructor or useEffect
+    }
   }
 
   createCamera() {
@@ -834,6 +840,7 @@ class App {
   }
 
   update() {
+    if (!this.renderer || !this.gl) return;
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
     const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
     if (this.medias) {
@@ -872,19 +879,26 @@ class App {
   }
 
   destroy() {
-    window.cancelAnimationFrame(this.raf);
+    if (this.raf) window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
     window.removeEventListener('mousewheel', this.boundOnWheel);
     window.removeEventListener('wheel', this.boundOnWheel);
-    this.container.removeEventListener('mousedown', this.boundOnTouchDown);
+    if (this.container) {
+      this.container.removeEventListener('mousedown', this.boundOnTouchDown);
+      this.container.removeEventListener('touchstart', this.boundOnTouchDown);
+    }
     window.removeEventListener('mousemove', this.boundOnTouchMove);
     window.removeEventListener('mouseup', this.boundOnTouchUp);
-    this.container.removeEventListener('touchstart', this.boundOnTouchDown);
     window.removeEventListener('touchmove', this.boundOnTouchMove);
     window.removeEventListener('touchend', this.boundOnTouchUp);
-    if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode) {
+    
+    if (this.renderer && this.renderer.gl && this.renderer.gl.canvas && this.renderer.gl.canvas.parentNode) {
       this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas as HTMLCanvasElement);
     }
+    
+    // Explicitly nullify to prevent further access
+    (this as any).renderer = null;
+    (this as any).gl = null;
   }
 }
 
@@ -899,6 +913,15 @@ interface CircularGalleryProps {
   onItemClick?: (id: string) => void;
 }
 
+function isWebGLAvailable() {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+  } catch (e) {
+    return false;
+  }
+}
+
 export default function CircularGallery({
   items,
   bend = 3,
@@ -910,21 +933,66 @@ export default function CircularGallery({
   onItemClick
 }: CircularGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hasWebGL, setHasWebGL] = useState(true);
+
   useEffect(() => {
+    if (!isWebGLAvailable()) {
+      setHasWebGL(false);
+      return;
+    }
+
     if (!containerRef.current) return;
-    const app = new App(containerRef.current, {
-      items,
-      bend,
-      textColor,
-      borderRadius,
-      font,
-      scrollSpeed,
-      scrollEase,
-      onItemClick
-    });
+    
+    let app: App | null = null;
+    try {
+      app = new App(containerRef.current, {
+        items,
+        bend,
+        textColor,
+        borderRadius,
+        font,
+        scrollSpeed,
+        scrollEase,
+        onItemClick
+      });
+    } catch (e) {
+      console.error('Failed to initialize CircularGallery App:', e);
+      setHasWebGL(false);
+    }
+    
     return () => {
-      app.destroy();
+      if (app) app.destroy();
     };
   }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, onItemClick]);
+
+  if (!hasWebGL) {
+    return (
+      <div className="w-full h-full overflow-y-auto p-4 md:p-8 bg-brand-ivory border-4 border-brand-black">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {(items || []).map((item) => (
+            <div 
+                key={item.id} 
+                onClick={() => onItemClick?.(item.id)}
+                className="group cursor-pointer border-2 border-brand-black bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_#FF0080] hover:-translate-x-1 hover:-translate-y-1 transition-all"
+            >
+                <div className="aspect-square overflow-hidden border-b-2 border-brand-black">
+                    <img 
+                        src={item.image} 
+                        alt={item.text} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                        referrerPolicy="no-referrer"
+                        onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/FF0080/FFFFFF?text=${encodeURIComponent(item.text.split('•')[0])}`; }}
+                    />
+                </div>
+                <div className="p-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest truncate">{item.text}</p>
+                </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" ref={containerRef} />;
 }

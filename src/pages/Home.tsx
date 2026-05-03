@@ -181,18 +181,18 @@ const CategoryGrid = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-12 md:grid-rows-2 gap-8 h-auto md:h-[900px]">
                     {/* Earrings */}
-                    <Link to="/shop" className="md:col-span-8 md:row-span-1 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#FF0080]">
+                    <Link to="/shop" className="md:col-span-8 md:row-span-1 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#FF0080] bg-white">
                         <img 
-                            src="https://images.unsplash.com/photo-1599459182885-3518f870562e?q=80&w=1200" 
+                            src="/Img/JHUMKA1.png" 
                             alt="Earrings" 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                            onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/1200x800/FF0080/FFFFFF?text=EARRINGS"; }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1632766346170-9e5c2782c54f?w=1200"; }}
                         />
-                        <div className="absolute inset-0 bg-brand-black/20 group-hover:bg-brand-black/40 transition-colors" />
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-brand-magenta/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="absolute bottom-8 left-8">
-                            <h4 className="text-6xl font-display font-black text-white italic tracking-tighter">Earrings</h4>
-                            <p className="text-xs font-black uppercase tracking-widest text-brand-yellow">Whispering Heritage</p>
+                            <h4 className="text-6xl font-display font-black text-brand-black italic tracking-tighter">Earrings</h4>
+                            <p className="text-xs font-black uppercase tracking-widest text-brand-magenta">Whispering Heritage</p>
                         </div>
                         <div className="absolute top-8 right-8 bg-white border-2 border-brand-black p-4 rotate-12 group-hover:rotate-0 transition-transform">
                             <ShoppingBag className="w-6 h-6" />
@@ -200,31 +200,31 @@ const CategoryGrid = () => {
                     </Link>
 
                     {/* Necklaces */}
-                    <Link to="/shop" className="md:col-span-4 md:row-span-2 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#FFE600]">
+                    <Link to="/shop" className="md:col-span-4 md:row-span-2 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#FFE600] bg-white">
                         <img 
-                            src="https://images.unsplash.com/photo-1627252877399-52e6931f8f90?q=80&w=800" 
+                            src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800" 
                             alt="Necklaces" 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                             onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x1200/FFE600/1A0A00?text=NECKLACES"; }}
                         />
-                        <div className="absolute inset-0 bg-brand-black/40 group-hover:bg-brand-black/60 transition-colors" />
+                        <div className="absolute inset-0 bg-brand-yellow/5 group-hover:bg-brand-yellow/0 transition-colors" />
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
-                            <h4 className="text-5xl font-display font-black text-white italic tracking-tighter leading-tight">Necklace <br /> Rituals</h4>
+                            <h4 className="text-5xl font-display font-black text-white italic tracking-tighter leading-tight drop-shadow-lg">Necklace <br /> Rituals</h4>
                             <div className="w-12 h-1 bg-brand-magenta mx-auto mt-4" />
                         </div>
                     </Link>
 
                     {/* Bangles */}
-                    <Link to="/shop" className="md:col-span-4 md:row-span-1 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#00C2C7]">
+                    <Link to="/shop" className="md:col-span-4 md:row-span-1 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#00C2C7] bg-white">
                         <img 
-                            src="https://images.unsplash.com/photo-1611591439978-21fb9f8e404b?q=80&w=800" 
+                            src="/Img/BANGLE1.png" 
                             alt="Bangles" 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                            onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x600/00C2C7/1A0A00?text=BANGLES"; }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1611591439978-21fb9f8e404b?w=800"; }}
                         />
-                        <div className="absolute inset-0 bg-brand-turquoise/20 group-hover:bg-brand-turquoise/40 transition-colors" />
+                        <div className="absolute inset-0 bg-brand-turquoise/5 group-hover:bg-brand-turquoise/0 transition-colors" />
                         <div className="absolute bottom-8 left-8">
                             <h4 className="text-4xl font-display font-black text-brand-black italic tracking-tighter">Bangles</h4>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Rhythm & Bloom</p>
@@ -232,17 +232,17 @@ const CategoryGrid = () => {
                     </Link>
 
                     {/* Accessories */}
-                    <Link to="/shop" className="md:col-span-4 md:row-span-1 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#FF4D1C]">
+                    <Link to="/shop" className="md:col-span-4 md:row-span-1 group relative overflow-hidden border-4 border-brand-black shadow-[12px_12px_0px_#FF4D1C] bg-white">
                         <img 
-                            src="https://images.unsplash.com/photo-1589128777073-263566ae5e4d?q=80&w=800" 
+                            src="https://images.unsplash.com/photo-1589128777073-263566ae5e4d?w=800" 
                             alt="Accessories" 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                             onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x600/FF4D1C/FFFFFF?text=ACCESSORIES"; }}
                         />
-                        <div className="absolute inset-0 bg-brand-coral/20 group-hover:bg-brand-coral/40 transition-colors" />
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-brand-black/20 to-transparent group-hover:from-transparent transition-all" />
                         <div className="absolute bottom-8 left-8">
-                            <h4 className="text-4xl font-display font-black text-brand-ivory italic tracking-tighter">Artifacts</h4>
+                            <h4 className="text-4xl font-display font-black text-brand-ivory italic tracking-tighter drop-shadow-md">Artifacts</h4>
                         </div>
                     </Link>
                 </div>

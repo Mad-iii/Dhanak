@@ -5,14 +5,14 @@ export const PRODUCTS: Product[] = [
     id: "1",
     name: "Phool Jhumka",
     price: "4,500",
-    img: "https://images.unsplash.com/photo-1632766346170-9e5c2782c54f?w=800",
+    img: "/Img/JHUMKA1.png",
     color: "bg-brand-magenta",
     category: "Earrings",
     tag: "Best Seller",
     description: "Intricately handcrafted jhumkas inspired by the spring blooms of Lahore. Featuring delicate pearl droplets and vibrant hand-enameling.",
     materials: "Gold-plated brass, hand-painted enamel, seed pearls.",
     gallery: [
-      "https://images.unsplash.com/photo-1632766346170-9e5c2782c54f?w=800",
+      "/Img/JHUMKA1.png",
       "https://images.unsplash.com/photo-1590548784585-645084364448?w=800",
       "https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?w=800"
     ]
@@ -53,14 +53,14 @@ export const PRODUCTS: Product[] = [
     id: "4",
     name: "Meena Bangle",
     price: "3,800",
-    img: "https://images.unsplash.com/photo-1611591439978-21fb9f8e404b?w=800",
+    img: "/Img/BANGLE1.png",
     color: "bg-brand-yellow",
     category: "Bangles",
     tag: "Trending",
     description: "Colorful bangles that sing with every move. Hand-painted by our master artisans in the heart of the walled city.",
     materials: "Metal alloy, glass enamel, semi-precious stones.",
     gallery: [
-      "https://images.unsplash.com/photo-1611591439978-21fb9f8e404b?w=800",
+      "/Img/BANGLE1.png",
       "https://images.unsplash.com/photo-1627252877399-52e6931f8f90?w=800",
       "https://images.unsplash.com/photo-1598560917505-10a174c83fc6?w=800"
     ]
