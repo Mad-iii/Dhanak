@@ -180,17 +180,20 @@ export const Checkout = () => {
                 body: JSON.stringify({
                     type: "ORDER_CREATED",
                     storeId: import.meta.env.VITE_STORE_ID,
-                    data: {
-                        orderNumber: `DHANAK-${Date.now()}`,
-                        total: finalTotal,
-                        customerName: `${formData.firstName} ${formData.lastName}`,
-                        customerEmail: undefined,
-                        items: cart.map(i => ({
-                            name: i.name,
-                            quantity: i.quantity,
-                            price: parseFloat(String(i.price).replace(/,/g, "")),
-                        })),
-                    },
+                   data: {
+                    orderNumber: `DHANAK-${Date.now()}`,
+                    total: finalTotal,
+                    customerName: `${formData.firstName} ${formData.lastName}`,
+                    customerEmail: undefined,
+                    // Add these:
+                    address: `${formData.address}, ${formData.city}`,
+                    phone: formData.phone,
+                    items: cart.map(i => ({
+                        name: i.name,
+                        quantity: i.quantity,
+                        price: parseFloat(String(i.price).replace(/,/g, "")),
+                    })),
+                },
                 }),
             }).catch(() => { });
 
