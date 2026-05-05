@@ -8,22 +8,25 @@ import { Cart } from './pages/Cart';
 import { Checkout } from './pages/Checkout';
 import { Story } from './pages/Story';
 import { CartProvider } from './context/CartContext';
+import { ProductsProvider } from './context/ProductsContext';
 
 export default function App() {
   return (
-    <CartProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="shop" element={<Shop />} />
-            <Route path="product/:id" element={<ProductDetail />} />
-            <Route path="cart" element={<Cart />} />
-            <Route path="checkout" element={<Checkout />} />
-            <Route path="story" element={<Story />} />
-          </Route>
-        </Routes>
-      </Router>
-    </CartProvider>
+    <ProductsProvider>
+      <CartProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="shop" element={<Shop />} />
+              <Route path="product/:id" element={<ProductDetail />} />
+              <Route path="cart" element={<Cart />} />
+              <Route path="checkout" element={<Checkout />} />
+              <Route path="story" element={<Story />} />
+            </Route>
+          </Routes>
+        </Router>
+      </CartProvider>
+    </ProductsProvider>
   );
 }

@@ -1,14 +1,17 @@
 export interface Product {
   id: string;
   name: string;
-  price: string;
+  price: number;        // was string — API returns number
+  stock?: number;
   img: string;
+  images?: string[];
+  gallery?: string[];   // mapped from images in ProductsContext
   color: string;
   tag?: string;
   category: string;
   description: string;
   materials: string;
-  gallery?: string[];
+  sku?: string;
 }
 
 export interface CartItem extends Product {
@@ -23,5 +26,8 @@ export interface PortalProduct {
   stock: number;
   category: string;
   img?: string;
+  images?: string[];
+  description?: string;
+  materials?: string;
   sku?: string;
 }

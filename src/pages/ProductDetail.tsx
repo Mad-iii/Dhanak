@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingBag, ArrowLeft, Star, Heart, Share2, MessageSquare, Check } from 'lucide-react';
-import { PRODUCTS } from '../constants';
+import { useProducts } from '../context/ProductsContext';
 import { BackgroundOverlay, DhanakMandala } from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { Review, subscribeToReviews, addReview } from '../services/reviewService';
@@ -12,7 +12,8 @@ import { MagneticWrapper } from '../components/Effects';
 export const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const product = PRODUCTS.find(p => p.id === id);
+    const { products } = useProducts();
+    const product = products.find(p => String(p.id) === String(id));
     const [activeImage, setActiveImage] = useState(product?.img || '');
     const [selectedSize, setSelectedSize] = useState('Standard');
 
@@ -41,7 +42,7 @@ export const ProductDetail = () => {
     const handleReviewSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id) return;
-        
+
         setIsSubmitting(true);
         try {
             await addReview(id, newReview.userName, newReview.rating, newReview.text);
@@ -55,7 +56,7 @@ export const ProductDetail = () => {
 
     if (!product) return <div className="min-h-screen flex items-center justify-center font-display text-4xl">Rainbow Lost...</div>;
 
-    const relatedHistory = PRODUCTS.filter(p => p.id !== id && (p.category === product.category || p.color === product.color)).slice(0, 6);
+    const relatedHistory = products.filter(p => p.id !== id && p.category === product?.category).slice(0, 6);
     const galleryItems = relatedHistory.map(p => ({
         image: p.img,
         text: `${p.name} • PKR ${p.price}`,
@@ -69,7 +70,7 @@ export const ProductDetail = () => {
     return (
         <div className="min-h-screen bg-brand-ivory relative overflow-hidden pb-32">
             <BackgroundOverlay />
-            
+
             <div className="container mx-auto px-6 py-12 relative z-10">
                 <Link to="/shop" className="inline-flex items-center gap-2 font-black uppercase text-[10px] tracking-widest mb-12 hover:text-brand-magenta transition-colors group">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Collection
@@ -80,26 +81,26 @@ export const ProductDetail = () => {
                     <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-12 gap-4">
                         <div className="md:col-span-2 flex md:flex-col gap-4 order-2 md:order-1">
                             {product.gallery?.map((img, idx) => (
-                                <motion.button 
+                                <motion.button
                                     key={idx}
                                     onClick={() => setActiveImage(img)}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    animate={{ 
+                                    animate={{
                                         scale: activeImage === img ? 1.1 : 1,
                                         zIndex: activeImage === img ? 10 : 1
                                     }}
                                     className={`relative aspect-square border-2 border-brand-black overflow-hidden transition-all duration-300 ${activeImage === img ? 'shadow-[4px_4px_0px_#FF0080] border-brand-magenta' : 'opacity-60 hover:opacity-100'}`}
                                 >
-                                    <img 
-                                        src={img} 
-                                        alt={`${product.name} ${idx}`} 
+                                    <img
+                                        src={img}
+                                        alt={`${product.name} ${idx}`}
                                         referrerPolicy="no-referrer"
-                                        className="w-full h-full object-cover" 
+                                        className="w-full h-full object-cover"
                                         onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/FF0080/FFFFFF?text=JEWELRY"; }}
                                     />
                                     {activeImage === img && (
-                                        <motion.div 
+                                        <motion.div
                                             layoutId="active-thumb"
                                             className="absolute inset-0 border-2 border-brand-magenta"
                                         />
@@ -110,34 +111,34 @@ export const ProductDetail = () => {
 
                         <div className="md:col-span-10 order-1 md:order-2">
                             <div className="aspect-[4/5] border-4 border-brand-black bg-white shadow-[12px_12px_0px_#FF0080] overflow-hidden relative">
-                                        <AnimatePresence mode="popLayout" initial={false}>
-                                            <motion.img 
-                                                key={activeImage}
-                                                src={activeImage} 
-                                                alt={product.name} 
-                                                referrerPolicy="no-referrer"
-                                                onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x1000/FF0080/FFFFFF?text=JEWELRY+PIECE"; }}
-                                                initial={{ x: 300, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                exit={{ x: -300, opacity: 0 }}
-                                                transition={{ 
-                                                    type: "spring", 
-                                                    stiffness: 300, 
-                                                    damping: 30,
-                                                    opacity: { duration: 0.2 }
-                                                }}
-                                                className="w-full h-full object-cover absolute inset-0"
-                                            />
-                                        </AnimatePresence>
+                                <AnimatePresence mode="popLayout" initial={false}>
+                                    <motion.img
+                                        key={activeImage}
+                                        src={activeImage}
+                                        alt={product.name}
+                                        referrerPolicy="no-referrer"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x1000/FF0080/FFFFFF?text=JEWELRY+PIECE"; }}
+                                        initial={{ x: 300, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        exit={{ x: -300, opacity: 0 }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 300,
+                                            damping: 30,
+                                            opacity: { duration: 0.2 }
+                                        }}
+                                        className="w-full h-full object-cover absolute inset-0"
+                                    />
+                                </AnimatePresence>
                             </div>
-                            
+
                             <div className="mt-8 grid grid-cols-2 gap-4">
                                 <div className="aspect-square border-4 border-brand-black bg-white shadow-[8px_8px_0px_#FFE600] overflow-hidden">
-                                    <img 
-                                        src={product.gallery?.[1] || product.img} 
-                                        alt={product.name} 
+                                    <img
+                                        src={product.gallery?.[1] || product.img}
+                                        alt={product.name}
                                         referrerPolicy="no-referrer"
-                                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" 
+                                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
                                         onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x800/FFE600/1A0A00?text=DETAIL"; }}
                                     />
                                 </div>
@@ -171,7 +172,7 @@ export const ProductDetail = () => {
                             <h5 className="text-xs font-black uppercase tracking-widest mb-4">Fit & Polish</h5>
                             <div className="flex gap-4">
                                 {['Standard', 'Bridal Size'].map(size => (
-                                    <button 
+                                    <button
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
                                         className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest border-2 border-brand-black transition-all ${selectedSize === size ? 'bg-brand-black text-white' : 'bg-transparent text-brand-black hover:bg-brand-yellow'}`}
@@ -184,15 +185,14 @@ export const ProductDetail = () => {
 
                         <div className="flex flex-col gap-4">
                             <MagneticWrapper strength={0.1}>
-                                <button 
+                                <button
                                     onClick={() => {
                                         addToCart(product);
                                         setIsAdded(true);
                                         setTimeout(() => setIsAdded(false), 2000);
                                     }}
-                                    className={`w-full py-6 px-12 text-sm font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 border-2 border-brand-black shadow-[10px_10px_0px_#FF0080] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all ${
-                                        isAdded ? 'bg-brand-turquoise text-brand-black' : 'bg-brand-black text-white'
-                                    }`}
+                                    className={`w-full py-6 px-12 text-sm font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 border-2 border-brand-black shadow-[10px_10px_0px_#FF0080] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all ${isAdded ? 'bg-brand-turquoise text-brand-black' : 'bg-brand-black text-white'
+                                        }`}
                                 >
                                     <AnimatePresence mode="wait">
                                         {isAdded ? (
@@ -244,15 +244,14 @@ export const ProductDetail = () => {
                         <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Price</span>
                         <span className="text-lg font-mono font-black italic text-brand-magenta">PKR {product.price}</span>
                     </div>
-                    <button 
+                    <button
                         onClick={() => {
                             addToCart(product);
                             setIsAdded(true);
                             setTimeout(() => setIsAdded(false), 2000);
                         }}
-                        className={`flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 border-2 border-brand-black shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all ${
-                            isAdded ? 'bg-brand-turquoise' : 'bg-brand-magenta text-white'
-                        }`}
+                        className={`flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 border-2 border-brand-black shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all ${isAdded ? 'bg-brand-turquoise' : 'bg-brand-magenta text-white'
+                            }`}
                     >
                         {isAdded ? (
                             <><Check className="w-4 h-4" /> Added</>
@@ -283,9 +282,9 @@ export const ProductDetail = () => {
                         </div>
                         <div className="relative">
                             <div className="border-4 border-brand-ivory aspect-square overflow-hidden shadow-[16px_16px_0px_#FF0080]">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1590548784585-643d2b9f2922?w=800" 
-                                    alt="Artisan Hands" 
+                                <img
+                                    src="https://images.unsplash.com/photo-1590548784585-643d2b9f2922?w=800"
+                                    alt="Artisan Hands"
                                     referrerPolicy="no-referrer"
                                     className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
                                     onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x800/FF0080/FFFFFF?text=ARTISAN"; }}
@@ -348,7 +347,7 @@ export const ProductDetail = () => {
 
                     <div className="h-[400px] md:h-[600px] -mx-6">
                         {galleryItems.length > 0 ? (
-                            <CircularGallery 
+                            <CircularGallery
                                 items={galleryItems}
                                 bend={1.5}
                                 textColor="#1A0A00"
