@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BackgroundOverlay, PaisleyMotif, MirrorWork, DhanakMandala } from '../components/Layout';
-import { PRODUCTS } from '../constants';
+import { fetchProducts } from '../services/portal';
+import { Product } from '../types';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, Filter, X, Plus, Minus, Info } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { TiltCard, MagneticWrapper } from '../components/Effects';
-import { Product } from '../types';
 
 export const Shop = () => {
     const { addToCart } = useCart();
@@ -14,20 +14,35 @@ export const Shop = () => {
     const [selectedColor, setSelectedColor] = React.useState<string | null>(null);
     const [quickViewProduct, setQuickViewProduct] = React.useState<Product | null>(null);
 
-    const categories = Array.from(new Set(PRODUCTS.map(p => p.category)));
+    const [products, setProducts] = React.useState<Product[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        fetchProducts()
+            .then(setProducts)
+            .finally(() => setLoading(false));
+    }, []);
+
+    const categories = Array.from(new Set(products.map(p => p.category)));
     const colorMap: Record<string, string> = {
         'bg-brand-magenta': 'Magenta',
         'bg-brand-turquoise': 'Turquoise',
         'bg-brand-coral': 'Coral',
         'bg-brand-yellow': 'Gold'
     };
-    const colors = Array.from(new Set(PRODUCTS.map(p => p.color)));
+    const colors = Array.from(new Set(products.map(p => p.color)));
 
-    const filteredProducts = PRODUCTS.filter(p => {
+    const filteredProducts = products.filter(p => {
         const categoryMatch = !selectedCategory || p.category === selectedCategory;
         const colorMatch = !selectedColor || p.color === selectedColor;
         return categoryMatch && colorMatch;
     });
+
+    if (loading) return (
+        <div className="min-h-screen bg-brand-ivory flex items-center justify-center">
+            <p className="font-display text-4xl italic animate-pulse">Loading the Palette...</p>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-brand-ivory relative overflow-hidden pb-32">
@@ -53,14 +68,14 @@ export const Shop = () => {
                         <div className="space-y-4 w-full">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-black/40 block">Category</label>
                             <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar md:flex-wrap">
-                                <button 
+                                <button
                                     onClick={() => setSelectedCategory(null)}
                                     className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${!selectedCategory ? 'bg-brand-black text-white border-brand-black' : 'border-brand-black/10 hover:border-brand-black'}`}
                                 >
                                     All
                                 </button>
                                 {categories.map(cat => (
-                                    <button 
+                                    <button
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${selectedCategory === cat ? 'bg-brand-magenta text-white border-brand-magenta' : 'border-brand-black/10 hover:border-brand-black'}`}
@@ -75,14 +90,14 @@ export const Shop = () => {
                         <div className="space-y-4 w-full">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-black/40 block">Aesthetic Tone</label>
                             <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar md:flex-wrap">
-                                <button 
+                                <button
                                     onClick={() => setSelectedColor(null)}
                                     className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${!selectedColor ? 'bg-brand-black text-white border-brand-black' : 'border-brand-black/10 hover:border-brand-black'}`}
                                 >
                                     Any
                                 </button>
                                 {colors.map(colorClass => (
-                                    <button 
+                                    <button
                                         key={colorClass}
                                         onClick={() => setSelectedColor(colorClass)}
                                         className={`group flex items-center gap-3 px-4 py-2 border-2 transition-all whitespace-nowrap ${selectedColor === colorClass ? 'border-brand-black bg-brand-black text-white' : 'border-brand-black/10 hover:border-brand-black'}`}
@@ -96,7 +111,7 @@ export const Shop = () => {
                     </div>
 
                     {(selectedCategory || selectedColor) && (
-                        <button 
+                        <button
                             onClick={() => {
                                 setSelectedCategory(null);
                                 setSelectedColor(null);
@@ -111,7 +126,7 @@ export const Shop = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-20 md:gap-y-32">
                     {filteredProducts.length > 0 ? (
                         filteredProducts.map((p, i) => (
-                            <motion.div 
+                            <motion.div
                                 key={p.id}
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -123,19 +138,19 @@ export const Shop = () => {
                                     <div className="absolute inset-x-0 top-0 h-[350px] md:h-[400px] transition-all duration-700 transform translate-y-[60px] md:translate-y-[80px] group-hover:translate-y-0 z-20">
                                         <TiltCard className="h-full border-4 border-brand-black relative overflow-hidden bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_rgba(0,0,0,1)] group-hover:shadow-[8px_8px_0px_#FF0080] md:group-hover:shadow-[12px_12px_0px_#FF0080] transition-all">
                                             <Link to={`/product/${p.id}`} className="block h-full">
-                                                <img 
-                                                    src={p.img} 
-                                                    alt={p.name} 
+                                                <img
+                                                    src={p.img}
+                                                    alt={p.name}
                                                     referrerPolicy="no-referrer"
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x1200/FF0080/FFFFFF?text=JEWELRY+PRODUCT"; }}
                                                 />
                                                 {p.gallery && p.gallery.length > 1 && (
-                                                    <img 
-                                                        src={p.gallery[1]} 
-                                                        alt={`${p.name} alternate view`} 
+                                                    <img
+                                                        src={p.gallery[1]}
+                                                        alt={`${p.name} alternate view`}
                                                         referrerPolicy="no-referrer"
-                                                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-110 group-hover:scale-100" 
+                                                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-110 group-hover:scale-100"
                                                         onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x1200/FFE600/1A0A00?text=ALTERNATE+VIEW"; }}
                                                     />
                                                 )}
@@ -144,7 +159,7 @@ export const Shop = () => {
                                                 <div className={`${p.color} text-white px-3 md:px-4 py-0.5 md:py-1 text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-brand-black`}>
                                                     {p.tag || "Heritage"}
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={(e) => { e.preventDefault(); setQuickViewProduct(p); }}
                                                     className="bg-white text-brand-black border border-brand-black px-3 py-1 text-[8px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all hover:bg-brand-black hover:text-white flex items-center gap-2 translate-x-[-10px] group-hover:translate-x-0"
                                                 >
@@ -153,7 +168,7 @@ export const Shop = () => {
                                             </div>
                                             <div className="absolute bottom-4 right-4 translate-y-20 group-hover:translate-y-0 transition-transform">
                                                 <MagneticWrapper strength={0.3}>
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p); }}
                                                         className="bg-white border-2 border-brand-black p-2 md:p-3 hover:bg-brand-magenta hover:text-white transition-colors"
                                                         title="Quick Add"
@@ -165,7 +180,7 @@ export const Shop = () => {
                                         </TiltCard>
                                     </div>
 
-    
+
                                     {/* Slide 2: Info container */}
                                     <div className="absolute inset-x-0 bottom-0 h-[80px] md:h-[100px] transition-all duration-700 transform -translate-y-[100px] md:-translate-y-[120px] group-hover:translate-y-0 z-10 flex flex-col justify-end">
                                         <Link to={`/product/${p.id}`}>
@@ -184,7 +199,7 @@ export const Shop = () => {
                     ) : (
                         <div className="col-span-full py-32 text-center border-4 border-dashed border-brand-black">
                             <p className="font-display text-4xl mb-4 italic opacity-40">The rainbow hasn't faded, it's just shifted.</p>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setSelectedCategory(null);
                                     setSelectedColor(null);
@@ -210,14 +225,14 @@ export const Shop = () => {
 
 const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose: () => void, onAdd: () => void }) => {
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-brand-black/60 backdrop-blur-md"
             onClick={onClose}
         >
-            <motion.div 
+            <motion.div
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
@@ -225,7 +240,7 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                 onClick={e => e.stopPropagation()}
             >
                 {/* Close Button */}
-                <button 
+                <button
                     onClick={onClose}
                     className="absolute top-4 right-4 z-50 bg-brand-black text-white p-2 border-2 border-brand-black shadow-[4px_4px_0px_#FF0080] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                 >
@@ -234,9 +249,9 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
 
                 {/* Left Side: Image */}
                 <div className="w-full md:w-1/2 aspect-square md:aspect-auto border-b-4 md:border-b-0 md:border-r-4 border-brand-black relative bg-white">
-                    <img 
-                        src={product.img} 
-                        alt={product.name} 
+                    <img
+                        src={product.img}
+                        alt={product.name}
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/800x1000/FF0080/FFFFFF?text=JEWELRY+PIECE"; }}
@@ -283,7 +298,7 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                     </div>
 
                     <div className="mt-12 flex flex-col gap-4">
-                        <button 
+                        <button
                             onClick={onAdd}
                             className="group relative w-full bg-brand-black text-brand-ivory py-6 border-2 border-brand-black shadow-[8px_8px_0px_#00C2C7] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all overflow-hidden"
                         >
@@ -292,8 +307,8 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                             </span>
                             <div className="absolute inset-0 bg-brand-turquoise translate-y-full group-hover:translate-y-0 transition-transform duration-500 rounded-full scale-150 blur-2xl opacity-20" />
                         </button>
-                        
-                        <Link 
+
+                        <Link
                             to={`/product/${product.id}`}
                             onClick={onClose}
                             className="text-center text-[10px] font-black uppercase tracking-widest hover:text-brand-magenta transition-colors flex items-center justify-center gap-2"
