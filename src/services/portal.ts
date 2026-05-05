@@ -6,9 +6,12 @@ const INGEST_SECRET = import.meta.env.VITE_INGEST_SECRET;  // ← fixed
 const STORE_ID = import.meta.env.VITE_STORE_ID;            // ← fixed
 
 export async function fetchProducts(): Promise<Product[]> {
+    console.log('Fetching from:', `${PORTAL_URL}/api/public/products?store=${STORE_SLUG}`);
     const res = await fetch(`${PORTAL_URL}/api/public/products?store=${STORE_SLUG}`);
+    console.log('Response status:', res.status);
     if (!res.ok) throw new Error('Failed to fetch products');
     const data: PortalProduct[] = await res.json();
+    console.log('Products received:', data);
     return data.map((p) => ({
         id: p.id,
         name: p.name,
