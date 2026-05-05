@@ -13,12 +13,12 @@ export async function fetchProducts(): Promise<Product[]> {
         id: p.id,
         name: p.name,
         price: p.price.toLocaleString('en-PK'),
-        img: p.img ?? '/Img/placeholder.png',
+        img: p.img ?? 'https://placehold.co/800x1200/1A0A00/FFE600?text=DHANAK',
         color: categoryColor(p.category),
         category: p.category ?? 'Accessories',
         description: '',
         materials: '',
-        gallery: p.img ? [p.img] : [],
+        gallery: p.img ? [p.img] : ['https://placehold.co/800x1200/1A0A00/FFE600?text=DHANAK'],
     }));
 }
 
