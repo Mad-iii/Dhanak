@@ -2,11 +2,11 @@ import { Product, PortalProduct } from '../types';
 
 const PORTAL_URL = import.meta.env.VITE_PORTAL_URL;
 const STORE_SLUG = import.meta.env.VITE_STORE_SLUG;
-const INGEST_SECRET = import.meta.env.INGEST_SECRET;
-const STORE_ID = import.meta.env.STORE_ID;
+const INGEST_SECRET = import.meta.env.VITE_INGEST_SECRET;  // ← fixed
+const STORE_ID = import.meta.env.VITE_STORE_ID;            // ← fixed
 
 export async function fetchProducts(): Promise<Product[]> {
-    const res = await fetch(`${PORTAL_URL}/api/products?store=${STORE_SLUG}`);
+    const res = await fetch(`${PORTAL_URL}/api/public/products?store=${STORE_SLUG}`);
     if (!res.ok) throw new Error('Failed to fetch products');
     const data: PortalProduct[] = await res.json();
     return data.map((p) => ({
