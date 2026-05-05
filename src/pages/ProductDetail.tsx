@@ -12,8 +12,8 @@ import { MagneticWrapper } from '../components/Effects';
 export const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { products } = useProducts();
-    const product = products.find(p => String(p.id) === String(id));
+    const { products, loading } = useProducts();
+    const product = products.find(p => p.id === id);
     const [activeImage, setActiveImage] = useState(product?.img || '');
     const [selectedSize, setSelectedSize] = useState('Standard');
 
@@ -54,8 +54,8 @@ export const ProductDetail = () => {
         }
     };
 
+    if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-4xl animate-pulse">Loading...</div>;
     if (!product) return <div className="min-h-screen flex items-center justify-center font-display text-4xl">Rainbow Lost...</div>;
-
     const relatedHistory = products.filter(p => p.id !== id && p.category === product?.category).slice(0, 6);
     const galleryItems = relatedHistory.map(p => ({
         image: p.img,

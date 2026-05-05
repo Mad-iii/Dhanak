@@ -78,27 +78,19 @@ const FeaturedProducts = () => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { products } = useProducts();
+
     const galleryItems = React.useMemo(() => products.map(p => ({
         image: p.img,
         text: `${p.name} • PKR ${p.price}`,
         id: p.id
     })), [products]);
-    const galleryItems = React.useMemo(() => PRODUCTS.map(p => ({
-        image: p.img,
-        text: `${p.name} • PKR ${p.price}`,
-        id: p.id
-    })), []);
 
     const handleItemClick = React.useCallback((id: string) => {
-        const product = PRODUCTS.find(p => p.id === id);
-        if (product) {
-            navigate(`/product/${id}`);
-        }
+        navigate(`/product/${id}`);
     }, [navigate]);
 
     return (
         <section className="py-16 md:py-32 bg-brand-ivory relative overflow-hidden h-[800px] md:h-[1200px]">
-            {/* Vibrant Background Accents */}
             <div className="absolute top-0 right-0 w-[80vw] md:w-[50vw] h-[80vw] md:h-[50vw] bg-brand-magenta/5 rounded-full blur-[80px] md:blur-[120px] -translate-y-1/2 translate-x-1/4" />
             <div className="absolute bottom-0 left-0 w-[70vw] md:w-[40vw] h-[70vw] md:h-[40vw] bg-brand-turquoise/5 rounded-full blur-[60px] md:blur-[100px] translate-y-1/4 -translate-x-1/4" />
 
