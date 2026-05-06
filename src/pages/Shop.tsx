@@ -20,6 +20,7 @@ export const Shop = () => {
     React.useEffect(() => {
         fetchProducts()
             .then(setProducts)
+            .catch((err) => console.error('fetchProducts failed:', err))
             .finally(() => setLoading(false));
     }, []);
 

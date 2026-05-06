@@ -58,9 +58,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = useCallback(() => setCart([]), []);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  
+
   const totalPrice = cart.reduce((sum, item) => {
-    const price = parseInt(item.price.replace(/,/g, ''));
+    const price = typeof item.price === 'string' ? parseInt((item.price as string).replace(/,/g, '')) : item.price;
     return sum + price * item.quantity;
   }, 0);
 
