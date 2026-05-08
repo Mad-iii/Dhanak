@@ -5,6 +5,8 @@ import { ShoppingBag, ArrowLeft, Star, Heart, Share2, MessageSquare, Check } fro
 import { useProducts } from '../context/ProductsContext';
 import { BackgroundOverlay, DhanakMandala } from '../components/Layout';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { AuthModal } from '../components/AuthModal';
 import { Review, subscribeToReviews, addReview } from '../services/reviewService';
 import CircularGallery from '../components/CircularGallery';
 import { MagneticWrapper } from '../components/Effects';
@@ -18,10 +20,35 @@ export const ProductDetail = () => {
     const [selectedSize, setSelectedSize] = useState('Standard');
 
     const { addToCart } = useCart();
+    const { user } = useAuth();
+    const [showAuth, setShowAuth] = useState(false);
+    const [pendingAdd, setPendingAdd] = useState(false);
+
     const [reviews, setReviews] = useState<Review[]>([]);
     const [newReview, setNewReview] = useState({ userName: '', rating: 5, text: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
+
+    const handleAddToCart = () => {
+        if (!product) return;
+        if (!user) {
+            setPendingAdd(true);
+            setShowAuth(true);
+            return;
+        }
+        addToCart(product);
+        setIsAdded(true);
+        setTimeout(() => setIsAdded(false), 2000);
+    };
+
+    const handleAuthSuccess = () => {
+        if (pendingAdd && product) {
+            addToCart(product);
+            setIsAdded(true);
+            setTimeout(() => setIsAdded(false), 2000);
+        }
+        setPendingAdd(false);
+    };
 
     useEffect(() => {
         if (product) {
@@ -42,7 +69,6 @@ export const ProductDetail = () => {
     const handleReviewSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id) return;
-
         setIsSubmitting(true);
         try {
             await addReview(id, newReview.userName, newReview.rating, newReview.text);
@@ -56,6 +82,7 @@ export const ProductDetail = () => {
 
     if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-4xl animate-pulse">Loading...</div>;
     if (!product) return <div className="min-h-screen flex items-center justify-center font-display text-4xl">Rainbow Lost...</div>;
+
     const relatedHistory = products.filter(p => p.id !== id && p.category === product?.category).slice(0, 6);
     const galleryItems = relatedHistory.map(p => ({
         image: p.img,
@@ -70,6 +97,16 @@ export const ProductDetail = () => {
     return (
         <div className="min-h-screen bg-brand-ivory relative overflow-hidden pb-32">
             <BackgroundOverlay />
+
+            {/* Auth Modal */}
+            <AnimatePresence>
+                {showAuth && (
+                    <AuthModal
+                        onClose={() => { setShowAuth(false); setPendingAdd(false); }}
+                        onSuccess={handleAuthSuccess}
+                    />
+                )}
+            </AnimatePresence>
 
             <div className="container mx-auto px-6 py-12 relative z-10">
                 <Link to="/shop" className="inline-flex items-center gap-2 font-black uppercase text-[10px] tracking-widest mb-12 hover:text-brand-magenta transition-colors group">
@@ -121,12 +158,7 @@ export const ProductDetail = () => {
                                         initial={{ x: 300, opacity: 0 }}
                                         animate={{ x: 0, opacity: 1 }}
                                         exit={{ x: -300, opacity: 0 }}
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 300,
-                                            damping: 30,
-                                            opacity: { duration: 0.2 }
-                                        }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 30, opacity: { duration: 0.2 } }}
                                         className="w-full h-full object-cover absolute inset-0"
                                     />
                                 </AnimatePresence>
@@ -186,13 +218,8 @@ export const ProductDetail = () => {
                         <div className="flex flex-col gap-4">
                             <MagneticWrapper strength={0.1}>
                                 <button
-                                    onClick={() => {
-                                        addToCart(product);
-                                        setIsAdded(true);
-                                        setTimeout(() => setIsAdded(false), 2000);
-                                    }}
-                                    className={`w-full py-6 px-12 text-sm font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 border-2 border-brand-black shadow-[10px_10px_0px_#FF0080] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all ${isAdded ? 'bg-brand-turquoise text-brand-black' : 'bg-brand-black text-white'
-                                        }`}
+                                    onClick={handleAddToCart}
+                                    className={`w-full py-6 px-12 text-sm font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 border-2 border-brand-black shadow-[10px_10px_0px_#FF0080] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all ${isAdded ? 'bg-brand-turquoise text-brand-black' : 'bg-brand-black text-white'}`}
                                 >
                                     <AnimatePresence mode="wait">
                                         {isAdded ? (
@@ -245,13 +272,8 @@ export const ProductDetail = () => {
                         <span className="text-lg font-mono font-black italic text-brand-magenta">PKR {product.price}</span>
                     </div>
                     <button
-                        onClick={() => {
-                            addToCart(product);
-                            setIsAdded(true);
-                            setTimeout(() => setIsAdded(false), 2000);
-                        }}
-                        className={`flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 border-2 border-brand-black shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all ${isAdded ? 'bg-brand-turquoise' : 'bg-brand-magenta text-white'
-                            }`}
+                        onClick={handleAddToCart}
+                        className={`flex-1 py-4 px-6 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 border-2 border-brand-black shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all ${isAdded ? 'bg-brand-turquoise' : 'bg-brand-magenta text-white'}`}
                     >
                         {isAdded ? (
                             <><Check className="w-4 h-4" /> Added</>
@@ -333,7 +355,7 @@ export const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* Related Products Section */}
+                {/* Related Products */}
                 <div className="mt-32 md:mt-48">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8 text-center md:text-left">
                         <div>
