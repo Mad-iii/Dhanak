@@ -4,11 +4,24 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Truck, CreditCard } from 'lucide-react';
 import { BackgroundOverlay } from '../components/Layout';
 import { useCart } from '../context/CartContext';
-
+import { useAuth } from '../context/AuthContext';
 export const Checkout = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const { cart, totalPrice, clearCart } = useCart();
+    const { user } = useAuth();
+
+    // Auto-fill form from Google account on first load
+    useEffect(() => {
+        if (user) {
+            const nameParts = (user.displayName ?? '').split(' ');
+            setFormData(prev => ({
+                ...prev,
+                firstName: prev.firstName || nameParts[0] || '',
+                lastName: prev.lastName || nameParts.slice(1).join(' ') || '',
+            }));
+        }
+    }, [user]);
     const DELIVERY_CHARGE = 300;
     const finalTotal = totalPrice + DELIVERY_CHARGE;
 
@@ -180,20 +193,20 @@ export const Checkout = () => {
                 body: JSON.stringify({
                     type: "ORDER_CREATED",
                     storeId: import.meta.env.VITE_STORE_ID,
-                   data: {
-                    orderNumber: `DHANAK-${Date.now()}`,
-                    total: finalTotal,
-                    customerName: `${formData.firstName} ${formData.lastName}`,
-                    customerEmail: undefined,
-                    // Add these:
-                    address: `${formData.address}, ${formData.city}`,
-                    phone: formData.phone,
-                    items: cart.map(i => ({
-                        name: i.name,
-                        quantity: i.quantity,
-                        price: parseFloat(String(i.price).replace(/,/g, "")),
-                    })),
-                },
+                    data: {
+                        orderNumber: `DHANAK-${Date.now()}`,
+                        total: finalTotal,
+                        customerName: `${formData.firstName} ${formData.lastName}`,
+                        customerEmail: user?.email ?? undefined,
+                        // Add these:
+                        address: `${formData.address}, ${formData.city}`,
+                        phone: formData.phone,
+                        items: cart.map(i => ({
+                            name: i.name,
+                            quantity: i.quantity,
+                            price: parseFloat(String(i.price).replace(/,/g, "")),
+                        })),
+                    },
                 }),
             }).catch(() => { });
 

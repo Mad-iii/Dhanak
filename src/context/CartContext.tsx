@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { CartItem, Product } from '../types';
+import { useAuth } from './AuthContext';
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
+  addToCart: (product: Product, onNeedAuth?: () => void) => void; removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
@@ -16,6 +16,8 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem('dhanak_cart');
     return savedCart ? JSON.parse(savedCart) : [];
@@ -26,7 +28,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('dhanak_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((product: Product, onNeedAuth?: () => void) => {
+    if (!user) {
+      onNeedAuth?.();
+      return;
+    }
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
@@ -37,7 +43,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return [...prevCart, { ...product, quantity: 1 }];
     });
     setIsCartOpen(true);
-  }, []);
+  }, [user]);
 
   const removeFromCart = useCallback((productId: string) => {
     setCart(prevCart => prevCart.filter(item => item.id !== productId));

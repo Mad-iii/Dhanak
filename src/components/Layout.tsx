@@ -4,9 +4,10 @@ import { ShoppingBag, Menu, Instagram, Twitter, Pin, ArrowRight, X, Trash2, Plus
 import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../context/CartContext';
 import { CustomCursor } from './CustomCursor';
+import { useAuth } from '../context/AuthContext';
+import { UserBadge } from './UserBadge';
 
 // Shared Motifs
-// ... (rest of motifs)
 export const DhanakMandala = ({ className }: { className?: string; key?: React.Key }) => (
   <svg viewBox="0 0 200 200" className={className} fill="currentColor">
     <path d="M100 20 C80 20 60 40 60 60 C60 80 80 100 100 100 C120 100 140 80 140 60 C140 40 120 20 100 20 Z" opacity="0.8" />
@@ -80,13 +81,13 @@ export const BackgroundOverlay = () => (
     {/* Embroidery Motifs */}
     <PaisleyMotif className="absolute top-[15%] right-[15%] w-[12vw] h-[12vw] text-brand-coral opacity-[0.08] rotate-[45deg]" />
     <PaisleyMotif className="absolute bottom-[20%] left-[10%] w-[15vw] h-[15vw] text-brand-magenta opacity-[0.05] -rotate-[15deg]" />
-    
+
     <LotusMotif className="absolute top-[35%] left-[5%] w-[10vw] h-[10vw] text-brand-turquoise opacity-[0.07] rotate-12" />
     <LotusMotif className="absolute bottom-[40%] right-[10%] w-[8vw] h-[8vw] text-brand-yellow opacity-[0.06] -rotate-45" />
 
     <ZardoziStar className="absolute top-[5%] right-[40%] w-[6vw] h-[6vw] text-brand-yellow opacity-[0.1] animate-pulse" />
     <ZardoziStar className="absolute bottom-[5%] left-[40%] w-[8vw] h-[8vw] text-brand-coral opacity-[0.08]" />
-    
+
     <MirrorWork className="absolute top-[60%] left-[25%] w-[5vw] h-[5vw] text-brand-ivory opacity-[0.1]" />
     <MirrorWork className="absolute bottom-[25%] right-[35%] w-[7vw] h-[7vw] text-brand-turquoise opacity-[0.05]" />
 
@@ -94,129 +95,129 @@ export const BackgroundOverlay = () => (
 
     <FloralVine className="absolute top-[20%] left-[18%] w-[15vw] h-[15vw] text-brand-turquoise opacity-[0.03] rotate-[30deg]" />
     <FloralVine className="absolute bottom-[10%] right-[20%] w-[20vw] h-[20vw] text-brand-coral opacity-[0.03] -rotate-[10deg]" />
-    
+
     {/* Central Focus (very faint) */}
     <DhanakMandala className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[90vw] text-brand-black opacity-[0.015]" />
   </div>
 );
 
 const CartDrawer = () => {
-    const { cart, removeFromCart, updateQuantity, totalPrice, isCartOpen, setIsCartOpen } = useCart();
-    const navigate = useNavigate();
+  const { cart, removeFromCart, updateQuantity, totalPrice, isCartOpen, setIsCartOpen } = useCart();
+  const navigate = useNavigate();
 
-    const handleCheckout = () => {
-        setIsCartOpen(false);
-        navigate('/checkout');
-    };
+  const handleCheckout = () => {
+    setIsCartOpen(false);
+    navigate('/checkout');
+  };
 
-    return (
-        <AnimatePresence>
-            {isCartOpen && (
-                <>
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsCartOpen(false)}
-                        className="fixed inset-0 bg-brand-black/60 backdrop-blur-sm z-[100] cursor-pointer"
-                    />
-                    <motion.div 
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-brand-ivory z-[101] shadow-2xl flex flex-col border-l-4 border-brand-black"
-                    >
-                        <div className="p-6 border-b-4 border-brand-black flex items-center justify-between bg-brand-magenta text-white">
-                            <div className="flex items-center gap-3">
-                                <ShoppingBag className="w-6 h-6" />
-                                <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter">Your Ritual Bag</h2>
-                            </div>
-                            <X className="w-8 h-8 cursor-pointer hover:rotate-90 transition-transform" onClick={() => setIsCartOpen(false)} />
+  return (
+    <AnimatePresence>
+      {isCartOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsCartOpen(false)}
+            className="fixed inset-0 bg-brand-black/60 backdrop-blur-sm z-[100] cursor-pointer"
+          />
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-brand-ivory z-[101] shadow-2xl flex flex-col border-l-4 border-brand-black"
+          >
+            <div className="p-6 border-b-4 border-brand-black flex items-center justify-between bg-brand-magenta text-white">
+              <div className="flex items-center gap-3">
+                <ShoppingBag className="w-6 h-6" />
+                <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter">Your Ritual Bag</h2>
+              </div>
+              <X className="w-8 h-8 cursor-pointer hover:rotate-90 transition-transform" onClick={() => setIsCartOpen(false)} />
+            </div>
+
+            <div className="flex-grow overflow-y-auto p-6 space-y-6 no-scrollbar">
+              {cart.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center py-20">
+                  <div className="w-24 h-24 text-brand-magenta/20 mb-8">
+                    <DhanakMandala className="w-full h-full" />
+                  </div>
+                  <h3 className="text-2xl font-display font-black uppercase italic mb-4">Your Bag is Lightweight</h3>
+                  <p className="text-sm font-medium opacity-60 mb-8 max-w-[200px]">It seems you haven't captured any rainbow fragments yet.</p>
+                  <button
+                    onClick={() => setIsCartOpen(false)}
+                    className="bg-brand-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-2 border-brand-black shadow-[4px_4px_0px_#FF0080] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
+                  >
+                    Start Your Journey
+                  </button>
+                </div>
+              ) : (
+                cart.map((item) => (
+                  <div key={item.id} className="flex gap-4 group">
+                    <div className="w-24 h-24 border-2 border-brand-black relative overflow-hidden shrink-0 bg-white">
+                      <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div className="flex-grow flex flex-col justify-between py-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="text-sm font-black uppercase tracking-widest">{item.name}</h4>
+                          <p className="text-[10px] font-bold text-brand-magenta italic">PKR {item.price}</p>
                         </div>
-
-                        <div className="flex-grow overflow-y-auto p-6 space-y-6 no-scrollbar">
-                            {cart.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-center py-20">
-                                    <div className="w-24 h-24 text-brand-magenta/20 mb-8">
-                                        <DhanakMandala className="w-full h-full" />
-                                    </div>
-                                    <h3 className="text-2xl font-display font-black uppercase italic mb-4">Your Bag is Lightweight</h3>
-                                    <p className="text-sm font-medium opacity-60 mb-8 max-w-[200px]">It seems you haven't captured any rainbow fragments yet.</p>
-                                    <button 
-                                        onClick={() => setIsCartOpen(false)}
-                                        className="bg-brand-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-2 border-brand-black shadow-[4px_4px_0px_#FF0080] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
-                                    >
-                                        Start Your Journey
-                                    </button>
-                                </div>
-                            ) : (
-                                cart.map((item) => (
-                                    <div key={item.id} className="flex gap-4 group">
-                                        <div className="w-24 h-24 border-2 border-brand-black relative overflow-hidden shrink-0 bg-white">
-                                            <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                        </div>
-                                        <div className="flex-grow flex flex-col justify-between py-1">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h4 className="text-sm font-black uppercase tracking-widest">{item.name}</h4>
-                                                    <p className="text-[10px] font-bold text-brand-magenta italic">PKR {item.price}</p>
-                                                </div>
-                                                <button 
-                                                    onClick={() => removeFromCart(item.id)}
-                                                    className="text-brand-black/20 hover:text-brand-coral transition-colors"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex border-2 border-brand-black">
-                                                    <button 
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                        className="px-2 py-1 hover:bg-brand-black hover:text-white transition-colors border-r-2 border-brand-black"
-                                                    >
-                                                        <Minus className="w-3 h-3" />
-                                                    </button>
-                                                    <span className="px-4 py-1 text-xs font-black">{item.quantity}</span>
-                                                    <button 
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        className="px-2 py-1 hover:bg-brand-black hover:text-white transition-colors border-l-2 border-brand-black"
-                                                    >
-                                                        <Plus className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-brand-black/20 hover:text-brand-coral transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex border-2 border-brand-black">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="px-2 py-1 hover:bg-brand-black hover:text-white transition-colors border-r-2 border-brand-black"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="px-4 py-1 text-xs font-black">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="px-2 py-1 hover:bg-brand-black hover:text-white transition-colors border-l-2 border-brand-black"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
 
-                        {cart.length > 0 && (
-                            <div className="p-6 border-t-4 border-brand-black bg-white">
-                                <div className="flex justify-between items-end mb-6">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Ritual Total</span>
-                                        <span className="text-3xl font-mono font-black italic text-brand-black">PKR {totalPrice.toLocaleString()}</span>
-                                    </div>
-                                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-right">
-                                        Tax & Shipping <br /> Calculated at Checkout
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={handleCheckout}
-                                    className="w-full bg-brand-black text-white py-6 text-sm font-black uppercase tracking-[0.3em] border-2 border-brand-black shadow-[8px_8px_0px_#FFE600] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-4"
-                                >
-                                    Finalise fragments <ArrowRight className="w-5 h-5" />
-                                </button>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-center mt-4 opacity-40">Free Express Delivery in Pakistan</p>
-                            </div>
-                        )}
-                    </motion.div>
-                </>
+            {cart.length > 0 && (
+              <div className="p-6 border-t-4 border-brand-black bg-white">
+                <div className="flex justify-between items-end mb-6">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Ritual Total</span>
+                    <span className="text-3xl font-mono font-black italic text-brand-black">PKR {totalPrice.toLocaleString()}</span>
+                  </div>
+                  <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-right">
+                    Tax & Shipping <br /> Calculated at Checkout
+                  </div>
+                </div>
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-brand-black text-white py-6 text-sm font-black uppercase tracking-[0.3em] border-2 border-brand-black shadow-[8px_8px_0px_#FFE600] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-4"
+                >
+                  Finalise fragments <ArrowRight className="w-5 h-5" />
+                </button>
+                <p className="text-[10px] font-black uppercase tracking-widest text-center mt-4 opacity-40">Free Express Delivery in Pakistan</p>
+              </div>
             )}
-        </AnimatePresence>
-    );
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
 };
 
 const Navbar = () => {
@@ -224,7 +225,8 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { totalItems, setIsCartOpen } = useCart();
-
+  // inside the nav JSX:
+  <UserBadge />
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
@@ -250,24 +252,24 @@ const Navbar = () => {
                 Shop
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-magenta transition-all group-hover:w-full" />
               </NavLink>
-              <NavLink to="/story" className={({ isActive }) => `group relative ${isActive ? 'text-brand-magenta' : ''}`}> 
-                Our Story 
+              <NavLink to="/story" className={({ isActive }) => `group relative ${isActive ? 'text-brand-magenta' : ''}`}>
+                Our Story
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-magenta transition-all group-hover:w-full" />
               </NavLink>
             </div>
           </div>
 
           <Link to="/" className="text-3xl md:text-5xl font-display font-black tracking-tight text-brand-black flex items-center gap-0.5">
-             <span className="text-brand-magenta italic">D</span>
-             <span className="text-brand-turquoise">h</span>
-             <span className="text-brand-yellow">a</span>
-             <span className="text-brand-coral">n</span>
-             <span className="text-brand-magenta italic">a</span>
-             <span className="text-brand-turquoise">k</span>
+            <span className="text-brand-magenta italic">D</span>
+            <span className="text-brand-turquoise">h</span>
+            <span className="text-brand-yellow">a</span>
+            <span className="text-brand-coral">n</span>
+            <span className="text-brand-magenta italic">a</span>
+            <span className="text-brand-turquoise">k</span>
           </Link>
 
           <div className="flex items-center gap-8">
-            <button 
+            <button
               onClick={() => setIsCartOpen(true)}
               className="relative group cursor-pointer bg-transparent border-none p-0"
             >
@@ -278,7 +280,7 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <button 
+            <button
               onClick={() => document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' })}
               className="hidden sm:block bg-brand-black text-brand-ivory px-6 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-brand-black border-2 border-brand-black transition-all"
             >
@@ -291,7 +293,7 @@ const Navbar = () => {
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
@@ -299,8 +301,8 @@ const Navbar = () => {
             className="fixed inset-0 z-[60] bg-brand-magenta flex flex-col"
           >
             <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-                <DhanakMandala className="absolute top-20 right-[-20%] w-80 h-80 text-white rotate-45" />
-                <ZardoziStar className="absolute bottom-20 left-[-10%] w-64 h-64 text-white -rotate-12" />
+              <DhanakMandala className="absolute top-20 right-[-20%] w-80 h-80 text-white rotate-45" />
+              <ZardoziStar className="absolute bottom-20 left-[-10%] w-64 h-64 text-white -rotate-12" />
             </div>
 
             <div className="flex justify-between items-center p-8 relative z-10">
@@ -310,13 +312,13 @@ const Navbar = () => {
 
             <div className="flex flex-col gap-6 p-8 relative z-10 overflow-y-auto">
               {['Home', 'Shop', 'Story'].map((item, idx) => (
-                <Link 
+                <Link
                   key={item}
-                  to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
+                  to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
                   onClick={() => setMobileMenuOpen(false)}
                   className="group relative"
                 >
-                  <motion.span 
+                  <motion.span
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.1 + idx * 0.1 }}
@@ -327,14 +329,14 @@ const Navbar = () => {
                   </motion.span>
                 </Link>
               ))}
-              <button 
+              <button
                 onClick={() => {
-                   setMobileMenuOpen(false);
-                   setIsCartOpen(true);
+                  setMobileMenuOpen(false);
+                  setIsCartOpen(true);
                 }}
                 className="group relative text-left bg-transparent border-none p-0"
               >
-                <motion.span 
+                <motion.span
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
@@ -347,12 +349,12 @@ const Navbar = () => {
             </div>
 
             <div className="mt-auto p-8 border-t border-white/20 bg-brand-black/10 relative z-10">
-               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Explore the Spectrum</p>
-               <div className="flex gap-8">
-                  <Instagram className="text-white w-6 h-6" />
-                  <Twitter className="text-white w-6 h-6" />
-                  <Pin className="text-white w-6 h-6" />
-               </div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Explore the Spectrum</p>
+              <div className="flex gap-8">
+                <Instagram className="text-white w-6 h-6" />
+                <Twitter className="text-white w-6 h-6" />
+                <Pin className="text-white w-6 h-6" />
+              </div>
             </div>
           </motion.div>
         )}
@@ -366,7 +368,7 @@ const Footer = () => {
     <footer className="bg-brand-black text-brand-ivory pt-32 pb-16 overflow-hidden relative border-t-4 border-brand-yellow">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="grid grid-cols-4 md:grid-cols-6 gap-8 rotate-12">
-           {[...Array(18)].map((_, i) => <DhanakMandala key={i} className="w-32 h-32 text-brand-magenta" />)}
+          {[...Array(18)].map((_, i) => <DhanakMandala key={i} className="w-32 h-32 text-brand-magenta" />)}
         </div>
       </div>
 
@@ -408,9 +410,9 @@ const Footer = () => {
             <h5 className="text-xs font-black uppercase tracking-[0.3em] text-brand-yellow mb-10 border-b border-brand-ivory/20 pb-4">Rainbow Mail</h5>
             <p className="text-xs mb-8 text-white font-bold leading-relaxed tracking-widest">Get early access to drops and heritage stories before anyone else.</p>
             <div className="relative">
-              <input 
-                type="email" 
-                placeholder="READY FOR THE DROP?" 
+              <input
+                type="email"
+                placeholder="READY FOR THE DROP?"
                 className="w-full bg-transparent border-b-2 border-brand-ivory py-4 text-xs font-black focus:outline-none focus:border-brand-magenta transition-colors placeholder:text-white/40 tracking-[0.2em]"
               />
               <button className="absolute right-0 bottom-4 text-brand-magenta hover:text-white transition-colors">
@@ -444,14 +446,14 @@ export const Layout = () => {
     <div className="bg-brand-ivory selection:bg-brand-yellow selection:text-brand-black min-h-screen flex flex-col relative">
       <AnimatePresence mode="wait">
         <motion.div
-           key={location.pathname + "-reveal"}
-           initial={{ scaleY: 1 }}
-           animate={{ scaleY: 0 }}
-           exit={{ scaleY: 0 }}
-           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-           className="fixed inset-0 z-[100] bg-brand-black origin-top pointer-events-none flex items-center justify-center"
+          key={location.pathname + "-reveal"}
+          initial={{ scaleY: 1 }}
+          animate={{ scaleY: 0 }}
+          exit={{ scaleY: 0 }}
+          transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+          className="fixed inset-0 z-[100] bg-brand-black origin-top pointer-events-none flex items-center justify-center"
         >
-            <h2 className="text-brand-ivory font-display text-8xl italic font-black animate-pulse">Dhanak</h2>
+          <h2 className="text-brand-ivory font-display text-8xl italic font-black animate-pulse">Dhanak</h2>
         </motion.div>
       </AnimatePresence>
 

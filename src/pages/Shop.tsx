@@ -1,23 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BackgroundOverlay, PaisleyMotif, MirrorWork, DhanakMandala } from '../components/Layout';
 import { fetchProducts } from '../services/portal';
 import { Product } from '../types';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, Filter, X, Plus, Minus, Info } from 'lucide-react';
+import { ArrowRight, ShoppingBag, X, Info } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { TiltCard, MagneticWrapper } from '../components/Effects';
+import { useAuth } from '../context/AuthContext';
+import { AuthModal } from '../components/AuthModal';
 
 export const Shop = () => {
     const { addToCart } = useCart();
-    const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-    const [selectedColor, setSelectedColor] = React.useState<string | null>(null);
-    const [quickViewProduct, setQuickViewProduct] = React.useState<Product | null>(null);
+    const { user } = useAuth();
 
-    const [products, setProducts] = React.useState<Product[]>([]);
-    const [loading, setLoading] = React.useState(true);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
+    const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showAuth, setShowAuth] = useState(false);
+    const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
 
-    React.useEffect(() => {
+    const handleAddToCart = (product: Product) => {
+        addToCart(product, () => {
+            setPendingProduct(product);
+            setShowAuth(true);
+        });
+    };
+
+    useEffect(() => {
         fetchProducts()
             .then(setProducts)
             .catch((err) => console.error('fetchProducts failed:', err))
@@ -55,6 +67,7 @@ export const Shop = () => {
                 <div className="absolute top-1/2 left-0 -ml-32 opacity-5 -rotate-12 translate-y-40">
                     <MirrorWork className="w-80 h-80 text-brand-black" />
                 </div>
+
                 <div className="mb-12 md:mb-20">
                     <h2 className="text-5xl md:text-[10rem] font-palmor font-black text-brand-black leading-[0.8] mb-8 md:mb-12 italic tracking-tighter uppercase">The <br /> Palette.</h2>
                     <div className="w-full h-2 md:h-4 bg-brand-magenta relative overflow-hidden">
@@ -62,10 +75,9 @@ export const Shop = () => {
                     </div>
                 </div>
 
-                {/* Filters Section */}
+                {/* Filters */}
                 <div className="mb-12 md:mb-16 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-end justify-between border-b-4 border-brand-black pb-8">
                     <div className="flex flex-col md:flex-row gap-6 md:gap-8 w-full">
-                        {/* Category Filter */}
                         <div className="space-y-4 w-full">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-black/40 block">Category</label>
                             <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar md:flex-wrap">
@@ -87,7 +99,6 @@ export const Shop = () => {
                             </div>
                         </div>
 
-                        {/* Color Filter */}
                         <div className="space-y-4 w-full">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-black/40 block">Aesthetic Tone</label>
                             <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar md:flex-wrap">
@@ -113,10 +124,7 @@ export const Shop = () => {
 
                     {(selectedCategory || selectedColor) && (
                         <button
-                            onClick={() => {
-                                setSelectedCategory(null);
-                                setSelectedColor(null);
-                            }}
+                            onClick={() => { setSelectedCategory(null); setSelectedColor(null); }}
                             className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-magenta hover:underline decoration-2 underline-offset-4"
                         >
                             <X className="w-3 h-3" /> Clear Soul Filters
@@ -124,6 +132,7 @@ export const Shop = () => {
                     )}
                 </div>
 
+                {/* Product Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-20 md:gap-y-32">
                     {filteredProducts.length > 0 ? (
                         filteredProducts.map((p, i) => (
@@ -135,7 +144,6 @@ export const Shop = () => {
                                 className="group"
                             >
                                 <div className="relative h-[480px] md:h-[550px] flex flex-col justify-center">
-                                    {/* Slide 1: Image container */}
                                     <div className="absolute inset-x-0 top-0 h-[350px] md:h-[400px] transition-all duration-700 transform translate-y-[60px] md:translate-y-[80px] group-hover:translate-y-0 z-20">
                                         <TiltCard className="h-full border-4 border-brand-black relative overflow-hidden bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_rgba(0,0,0,1)] group-hover:shadow-[8px_8px_0px_#FF0080] md:group-hover:shadow-[12px_12px_0px_#FF0080] transition-all">
                                             <Link to={`/product/${p.id}`} className="block h-full">
@@ -170,7 +178,7 @@ export const Shop = () => {
                                             <div className="absolute bottom-4 right-4 translate-y-20 group-hover:translate-y-0 transition-transform">
                                                 <MagneticWrapper strength={0.3}>
                                                     <button
-                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p); }}
+                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(p); }}
                                                         className="bg-white border-2 border-brand-black p-2 md:p-3 hover:bg-brand-magenta hover:text-white transition-colors"
                                                         title="Quick Add"
                                                     >
@@ -181,8 +189,6 @@ export const Shop = () => {
                                         </TiltCard>
                                     </div>
 
-
-                                    {/* Slide 2: Info container */}
                                     <div className="absolute inset-x-0 bottom-0 h-[80px] md:h-[100px] transition-all duration-700 transform -translate-y-[100px] md:-translate-y-[120px] group-hover:translate-y-0 z-10 flex flex-col justify-end">
                                         <Link to={`/product/${p.id}`}>
                                             <div className="flex justify-between items-end p-3 md:p-4 bg-brand-ivory border-x-4 border-b-4 border-brand-black shadow-[6px_6px_0px_rgba(0,0,0,0.1)] md:shadow-[8px_8px_0px_rgba(0,0,0,0.1)] group-hover:shadow-[6px_6px_0px_#FFE600] md:group-hover:shadow-[8px_8px_0px_#FFE600] transition-all">
@@ -201,10 +207,7 @@ export const Shop = () => {
                         <div className="col-span-full py-32 text-center border-4 border-dashed border-brand-black">
                             <p className="font-display text-4xl mb-4 italic opacity-40">The rainbow hasn't faded, it's just shifted.</p>
                             <button
-                                onClick={() => {
-                                    setSelectedCategory(null);
-                                    setSelectedColor(null);
-                                }}
+                                onClick={() => { setSelectedCategory(null); setSelectedColor(null); }}
                                 className="text-[10px] font-black uppercase tracking-widest text-brand-magenta hover:underline decoration-2"
                             >
                                 Reset Filters to see the spectrum
@@ -213,18 +216,32 @@ export const Shop = () => {
                     )}
                 </div>
 
+                {/* Quick View Modal */}
                 <AnimatePresence>
                     {quickViewProduct && (
-                        <QuickViewModal product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAdd={() => { addToCart(quickViewProduct); setQuickViewProduct(null); }} />
+                        <QuickViewModal
+                            product={quickViewProduct}
+                            onClose={() => setQuickViewProduct(null)}
+                            onAdd={() => { handleAddToCart(quickViewProduct); setQuickViewProduct(null); }}
+                        />
                     )}
                 </AnimatePresence>
 
+                {/* Auth Modal */}
+                <AnimatePresence>
+                    {showAuth && (
+                        <AuthModal
+                            onClose={() => { setShowAuth(false); setPendingProduct(null); }}
+                            onSuccess={() => { if (pendingProduct) addToCart(pendingProduct); setPendingProduct(null); }}
+                        />
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
 };
 
-const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose: () => void, onAdd: () => void }) => {
+const QuickViewModal = ({ product, onClose, onAdd }: { product: Product; onClose: () => void; onAdd: () => void }) => {
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -240,7 +257,6 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                 className="bg-brand-ivory w-full max-w-5xl max-h-[90vh] border-4 border-brand-black shadow-[20px_20px_0px_rgba(0,0,0,1)] overflow-hidden relative flex flex-col md:flex-row"
                 onClick={e => e.stopPropagation()}
             >
-                {/* Close Button */}
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 z-50 bg-brand-black text-white p-2 border-2 border-brand-black shadow-[4px_4px_0px_#FF0080] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
@@ -248,7 +264,6 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                     <X className="w-6 h-6" />
                 </button>
 
-                {/* Left Side: Image */}
                 <div className="w-full md:w-1/2 aspect-square md:aspect-auto border-b-4 md:border-b-0 md:border-r-4 border-brand-black relative bg-white">
                     <img
                         src={product.img}
@@ -262,7 +277,6 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                     </div>
                 </div>
 
-                {/* Right Side: Details */}
                 <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto no-scrollbar bg-brand-ivory flex flex-col">
                     <div className="mb-8">
                         <span className={`inline-block px-4 py-1 text-[10px] font-black uppercase tracking-widest text-white border border-brand-black mb-4 ${product.color}`}>
@@ -287,7 +301,6 @@ const QuickViewModal = ({ product, onClose, onAdd }: { product: Product, onClose
                                 "{product.description}"
                             </p>
                         </div>
-
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-black/40 mb-4 flex items-center gap-2">
                                 <div className="w-8 h-[2px] bg-brand-coral" /> Essence
