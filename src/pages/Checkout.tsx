@@ -5,6 +5,7 @@ import { ShieldCheck, Truck, CreditCard } from 'lucide-react';
 import { BackgroundOverlay } from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { portal } from '../services/portal';
 export const Checkout = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
@@ -90,19 +91,20 @@ export const Checkout = () => {
         }
     };
 
-    const handleEmailNotification = () => {
-        const orderDetails = {
-            id: '#7712',
-            customer: `${formData.firstName} ${formData.lastName}`,
-            phone: formData.phone,
-            address: `${formData.address}, ${formData.city}`,
-            items: cart.map(i => `${i.name} x${i.quantity}`).join(', '),
+    const sendOrderToPortal = () => {
+        portal.orderCreated({
+            orderNumber: `DHANAK-${Date.now()}`,
             total: finalTotal,
-            payment: paymentMethod
-        };
-
-        console.log(`%c[SYSTEM] EMAIL SENT TO: mahdsadiq360@gmail.com`, 'color: #FF0080; font-weight: bold; font-size: 14px;');
-        console.log('Order Details:', orderDetails);
+            customerName: `${formData.firstName} ${formData.lastName}`,
+            customerEmail: user?.email ?? undefined,
+            address: `${formData.address}, ${formData.city}`,
+            phone: formData.phone,
+            items: cart.map(i => ({
+                name: i.name,
+                quantity: i.quantity,
+                price: parseFloat(String(i.price).replace(/,/g, "")),
+            })),
+        });
     };
 
     const handleOnlineBanking = async () => {
@@ -137,7 +139,6 @@ export const Checkout = () => {
             setErrors(prev => ({ ...prev, accountNumber: 'Safepay Connection Failed' }));
         }
     };
-
     const handleOTPAndFinish = () => {
         if (!formData.otp.trim()) {
             setErrors(prev => ({ ...prev, otp: 'OTP is required' }));
@@ -146,7 +147,7 @@ export const Checkout = () => {
         setIsProcessing(true);
         setTimeout(() => {
             setIsProcessing(false);
-            handleEmailNotification();
+            sendOrderToPortal();
             setStep(3);
         }, 1500);
     };
@@ -160,7 +161,6 @@ export const Checkout = () => {
             setIsProcessing(true);
 
             try {
-                // Initialize Safepay for the card transaction
                 const response = await fetch('/api/payment/init', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -169,10 +169,9 @@ export const Checkout = () => {
                 const data = await response.json();
                 if (!data.success) throw new Error(data.error);
 
-                // Simulation of card processing
                 setTimeout(() => {
                     setIsProcessing(false);
-                    handleEmailNotification();
+                    sendOrderToPortal();
                     setStep(3);
                 }, 2000);
             } catch (error) {
@@ -181,35 +180,7 @@ export const Checkout = () => {
                 setErrors(prev => ({ ...prev, cardNumber: 'Safepay Connection Failed' }));
             }
         } else if (paymentMethod === 'cod') {
-            handleEmailNotification();
-
-            // Send to portal
-            fetch(`${import.meta.env.VITE_PORTAL_URL}/api/ingest`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-ingest-secret": import.meta.env.VITE_INGEST_SECRET,
-                },
-                body: JSON.stringify({
-                    type: "ORDER_CREATED",
-                    storeId: import.meta.env.VITE_STORE_ID,
-                    data: {
-                        orderNumber: `DHANAK-${Date.now()}`,
-                        total: finalTotal,
-                        customerName: `${formData.firstName} ${formData.lastName}`,
-                        customerEmail: user?.email ?? undefined,
-                        // Add these:
-                        address: `${formData.address}, ${formData.city}`,
-                        phone: formData.phone,
-                        items: cart.map(i => ({
-                            name: i.name,
-                            quantity: i.quantity,
-                            price: parseFloat(String(i.price).replace(/,/g, "")),
-                        })),
-                    },
-                }),
-            }).catch(() => { });
-
+            sendOrderToPortal();
             setStep(3);
         }
     };
