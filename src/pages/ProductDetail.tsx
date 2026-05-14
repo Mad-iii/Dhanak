@@ -6,7 +6,6 @@ import { useProducts } from '../context/ProductsContext';
 import { BackgroundOverlay, DhanakMandala } from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { AuthModal } from '../components/AuthModal';
 import { Review, subscribeToReviews, addReview } from '../services/reviewService';
 import CircularGallery from '../components/CircularGallery';
 import { MagneticWrapper } from '../components/Effects';
@@ -21,8 +20,6 @@ export const ProductDetail = () => {
 
     const { addToCart } = useCart();
     const { user } = useAuth();
-    const [showAuth, setShowAuth] = useState(false);
-    const [pendingAdd, setPendingAdd] = useState(false);
 
     const [reviews, setReviews] = useState<Review[]>([]);
     const [newReview, setNewReview] = useState({ userName: '', rating: 5, text: '' });
@@ -31,23 +28,9 @@ export const ProductDetail = () => {
 
     const handleAddToCart = () => {
         if (!product) return;
-        if (!user) {
-            setPendingAdd(true);
-            setShowAuth(true);
-            return;
-        }
         addToCart(product);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
-    };
-
-    const handleAuthSuccess = () => {
-        if (pendingAdd && product) {
-            addToCart(product);
-            setIsAdded(true);
-            setTimeout(() => setIsAdded(false), 2000);
-        }
-        setPendingAdd(false);
     };
 
     useEffect(() => {
@@ -97,16 +80,6 @@ export const ProductDetail = () => {
     return (
         <div className="min-h-screen bg-brand-ivory relative overflow-hidden pb-32">
             <BackgroundOverlay />
-
-            {/* Auth Modal */}
-            <AnimatePresence>
-                {showAuth && (
-                    <AuthModal
-                        onClose={() => { setShowAuth(false); setPendingAdd(false); }}
-                        onSuccess={handleAuthSuccess}
-                    />
-                )}
-            </AnimatePresence>
 
             <div className="container mx-auto px-6 py-12 relative z-10">
                 <Link to="/shop" className="inline-flex items-center gap-2 font-black uppercase text-[10px] tracking-widest mb-12 hover:text-brand-magenta transition-colors group">

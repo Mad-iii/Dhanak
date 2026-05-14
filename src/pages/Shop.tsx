@@ -8,7 +8,6 @@ import { ArrowRight, ShoppingBag, X, Info } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { TiltCard, MagneticWrapper } from '../components/Effects';
 import { useAuth } from '../context/AuthContext';
-import { AuthModal } from '../components/AuthModal';
 
 export const Shop = () => {
     const { addToCart } = useCart();
@@ -19,14 +18,8 @@ export const Shop = () => {
     const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showAuth, setShowAuth] = useState(false);
-    const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
-
     const handleAddToCart = (product: Product) => {
-        addToCart(product, () => {
-            setPendingProduct(product);
-            setShowAuth(true);
-        });
+        addToCart(product);
     };
 
     useEffect(() => {
@@ -229,12 +222,6 @@ export const Shop = () => {
 
                 {/* Auth Modal */}
                 <AnimatePresence>
-                    {showAuth && (
-                        <AuthModal
-                            onClose={() => { setShowAuth(false); setPendingProduct(null); }}
-                            onSuccess={() => { if (pendingProduct) addToCart(pendingProduct); setPendingProduct(null); }}
-                        />
-                    )}
                 </AnimatePresence>
             </div>
         </div>
