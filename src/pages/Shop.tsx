@@ -36,8 +36,7 @@ export const Shop = () => {
         'bg-brand-coral': 'Coral',
         'bg-brand-yellow': 'Gold'
     };
-    const colors = Array.from(new Set(products.map(p => p.color)));
-
+    const colors = Array.from(new Set(products.map(p => p.color).filter((c): c is string => typeof c === 'string')));
     const filteredProducts = products.filter(p => {
         const categoryMatch = !selectedCategory || p.category === selectedCategory;
         const colorMatch = !selectedColor || p.color === selectedColor;
@@ -101,15 +100,14 @@ export const Shop = () => {
                                 >
                                     Any
                                 </button>
-                                {colors.map(colorClass => (
-                                    <button
-                                        key={colorClass}
-                                        onClick={() => setSelectedColor(colorClass)}
-                                        className={`group flex items-center gap-3 px-4 py-2 border-2 transition-all whitespace-nowrap ${selectedColor === colorClass ? 'border-brand-black bg-brand-black text-white' : 'border-brand-black/10 hover:border-brand-black'}`}
-                                    >
-                                        <span className={`w-3 h-3 rounded-full border border-white/20 ${colorClass}`} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{colorMap[colorClass] || 'Tone'}</span>
-                                    </button>
+                                {colors.map((colorClass: string) => (<button
+                                    key={colorClass}
+                                    onClick={() => setSelectedColor(colorClass)}
+                                    className={`group flex items-center gap-3 px-4 py-2 border-2 transition-all whitespace-nowrap ${selectedColor === colorClass ? 'border-brand-black bg-brand-black text-white' : 'border-brand-black/10 hover:border-brand-black'}`}
+                                >
+                                    <span className={`w-3 h-3 rounded-full border border-white/20 ${colorClass}`} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{colorMap[colorClass] || 'Tone'}</span>
+                                </button>
                                 ))}
                             </div>
                         </div>
