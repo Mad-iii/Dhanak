@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowRight, Star, ShoppingBag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BackgroundOverlay, DhanakMandala, ZardoziStar, MirrorWork, PhulkariGrid } from '../components/Layout';
 import { useProducts } from '../context/ProductsContext';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 import CircularGallery from '../components/CircularGallery';
 import { RevealText } from '../components/Typography';
-import { AnimatePresence } from 'motion/react';
-import { AuthModal } from '../components/AuthModal';
 
 const Hero = () => {
     const { scrollY } = useScroll();
@@ -289,24 +286,8 @@ const FloatingAura = () => {
 };
 
 export const Home = () => {
-    const { user, loading } = useAuth();
-    const [showAuth, setShowAuth] = useState(false);
-
-    useEffect(() => {
-        // Only show auth popup if user is not logged in and auth check has completed
-        if (!loading && !user) {
-            const timer = setTimeout(() => setShowAuth(true), 800);
-            return () => clearTimeout(timer);
-        }
-    }, [loading, user]);
-
     return (
         <div className="relative">
-            <AnimatePresence>
-                {showAuth && (
-                    <AuthModal onClose={() => setShowAuth(false)} />
-                )}
-            </AnimatePresence>
             <FloatingAura />
             <Hero />
             <MarqueeStrip />

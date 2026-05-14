@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Mail, Chrome } from 'lucide-react';
+import { X, Chrome } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Props {
     onClose: () => void;
     onSuccess?: () => void;
+    required?: boolean; // when true: no X button, no backdrop dismiss
 }
 
-export const AuthModal: React.FC<Props> = ({ onClose, onSuccess }) => {
+export const AuthModal: React.FC<Props> = ({ onClose, onSuccess, required = false }) => {
     const { loginWithEmail, registerWithEmail, loginWithGoogle } = useAuth();
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [email, setEmail] = useState('');
@@ -50,13 +51,17 @@ export const AuthModal: React.FC<Props> = ({ onClose, onSuccess }) => {
         }
     };
 
+    const handleBackdropClick = () => {
+        if (!required) onClose();
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-brand-black/70 backdrop-blur-md"
-            onClick={onClose}
+            onClick={handleBackdropClick}
         >
             <motion.div
                 initial={{ scale: 0.9, y: 20 }}
@@ -65,9 +70,17 @@ export const AuthModal: React.FC<Props> = ({ onClose, onSuccess }) => {
                 className="bg-brand-ivory w-full max-w-md border-4 border-brand-black shadow-[16px_16px_0px_#FF0080] p-10 relative"
                 onClick={e => e.stopPropagation()}
             >
-                <button onClick={onClose} className="absolute top-4 right-4 bg-brand-black text-white p-2">
-                    <X className="w-5 h-5" />
-                </button>
+                {!required && (
+                    <button onClick={onClose} className="absolute top-4 right-4 bg-brand-black text-white p-2">
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
+
+                {required && (
+                    <div className="mb-6 px-4 py-3 bg-brand-black text-white text-[10px] font-black uppercase tracking-widest text-center">
+                        Sign in to access Dhanak
+                    </div>
+                )}
 
                 <h2 className="text-4xl font-display font-black italic mb-2">
                     {mode === 'login' ? 'Welcome Back.' : 'Join Dhanak.'}
