@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Menu, Instagram, Twitter, Pin, ArrowRight, X, Trash2, Plus, Minus, Check } from 'lucide-react';
+import { ShoppingBag, Menu, Instagram, Twitter, Pin, ArrowRight, X, Trash2, Plus, Minus, Check, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../context/CartContext';
 import { CustomCursor } from './CustomCursor';
@@ -220,13 +220,38 @@ const CartDrawer = () => {
   );
 };
 
+const MobileUserSection: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { user, logout } = useAuth();
+  if (!user) return null;
+  const firstName = user.displayName?.split(' ')[0] ?? user.email?.split('@')[0];
+  const initials = (user.displayName ?? user.email ?? '?')
+    .split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  return (
+    <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/20">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-white text-brand-black flex items-center justify-center font-black text-[11px] border-2 border-white/40">
+          {initials}
+        </div>
+        <div>
+          <p className="text-white text-[11px] font-black uppercase tracking-wider">{firstName}</p>
+          <p className="text-white/50 text-[9px] font-bold truncate max-w-[140px]">{user.email}</p>
+        </div>
+      </div>
+      <button
+        onClick={() => { logout(); onClose(); }}
+        className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-white/70 hover:text-white transition-colors"
+      >
+        <LogOut className="w-4 h-4" /> Out
+      </button>
+    </div>
+  );
+};
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { totalItems, setIsCartOpen } = useCart();
-  // inside the nav JSX:
-  <UserBadge />
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
@@ -268,7 +293,8 @@ const Navbar = () => {
             <span className="text-brand-turquoise">k</span>
           </Link>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4">
+            <UserBadge />
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative group cursor-pointer bg-transparent border-none p-0"
@@ -349,6 +375,7 @@ const Navbar = () => {
             </div>
 
             <div className="mt-auto p-8 border-t border-white/20 bg-brand-black/10 relative z-10">
+              <MobileUserSection onClose={() => setMobileMenuOpen(false)} />
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Explore the Spectrum</p>
               <div className="flex gap-8">
                 <Instagram className="text-white w-6 h-6" />
