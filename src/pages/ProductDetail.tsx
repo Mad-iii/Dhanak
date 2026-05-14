@@ -22,7 +22,7 @@ export const ProductDetail = () => {
     const { user } = useAuth();
 
     const [reviews, setReviews] = useState<Review[]>([]);
-    const [newReview, setNewReview] = useState({ userName: '', rating: 5, text: '' });
+    const [newReview, setNewReview] = useState({ userName: user?.displayName ?? user?.email?.split('@')[0] ?? '', rating: 5, text: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
 
@@ -306,7 +306,7 @@ export const ProductDetail = () => {
                                                 {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-brand-black/10'} stroke-brand-black stroke-2`} />)}
                                             </div>
                                             <p className="font-bold text-lg mb-3">"{review.text}"</p>
-                                            <div className="text-[10px] font-black uppercase tracking-widest opacity-60">{review.userName} • {review.createdAt ? new Date(review.createdAt.toMillis()).toLocaleDateString() : 'Just now'}</div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest opacity-60">{review.userName} • {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Just now'}</div>
                                         </div>
                                     ))}
                                 </div>
