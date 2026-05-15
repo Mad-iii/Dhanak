@@ -103,6 +103,7 @@ export const Checkout = () => {
                 name: i.name,
                 quantity: i.quantity,
                 price: parseFloat(String(i.price).replace(/,/g, "")),
+                productId: i.id ?? null,
             })),
         });
     };
