@@ -107,6 +107,55 @@ async function startServer() {
       });
     }
   }
+  app.get("/api/reviews/eligible", async (req, res) => {
+    const { storeId, productId, customerEmail } = req.query as Record<string, string>;
+    if (!storeId || !productId || !customerEmail) {
+      return res.status(400).json({ error: "Missing params" });
+    }
+
+    const ownerPortalUrl = process.env.OWNER_PORTAL_URL ?? "https://owner-portal-ten.vercel.app";
+    const secret = process.env.DHANAK_API_SECRET ?? "";
+    const storeIdParam = process.env.STORE_ID ?? storeId;
+
+    try {
+      const upstream = await fetch(
+        `${ownerPortalUrl}/api/reviews/eligible?storeId=${storeIdParam}&productId=${encodeURIComponent(productId)}&customerEmail=${encodeURIComponent(customerEmail)}`,
+        { headers: { "x-api-secret": secret } }
+      );
+      const data = await upstream.json();
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 2. Submit review — proxies from frontend to Owner-portal with the server secret
+  app.post("/api/reviews", async (req, res) => {
+    const ownerPortalUrl = process.env.OWNER_PORTAL_URL ?? "https://owner-portal-ten.vercel.app";
+    const secret = process.env.DHANAK_API_SECRET ?? "";
+    const storeId = process.env.STORE_ID;
+
+    if (!storeId) {
+      return res.status(500).json({ error: "STORE_ID env var not set" });
+    }
+
+    const body = { ...req.body, storeId };
+
+    try {
+      const upstream = await fetch(`${ownerPortalUrl}/api/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-secret": secret,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await upstream.json();
+      res.status(upstream.status).json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);

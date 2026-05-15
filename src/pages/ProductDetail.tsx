@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingBag, ArrowLeft, Star, Heart, Share2, MessageSquare, Check } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Star, Heart, Share2, Check } from 'lucide-react';
 import { useProducts } from '../context/ProductsContext';
 import { BackgroundOverlay, DhanakMandala } from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Review, subscribeToReviews, addReview } from '../services/reviewService';
 import CircularGallery from '../components/CircularGallery';
 import { MagneticWrapper } from '../components/Effects';
+import ProductReviews from '../components/ProductReviews';
 
 export const ProductDetail = () => {
     const { id } = useParams();
@@ -21,9 +21,6 @@ export const ProductDetail = () => {
     const { addToCart } = useCart();
     const { user } = useAuth();
 
-    const [reviews, setReviews] = useState<Review[]>([]);
-    const [newReview, setNewReview] = useState({ userName: user?.displayName ?? user?.email?.split('@')[0] ?? '', rating: 5, text: '' });
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
 
     const handleAddToCart = () => {
@@ -40,28 +37,6 @@ export const ProductDetail = () => {
             window.scrollTo(0, 0);
         }
     }, [product]);
-
-    useEffect(() => {
-        if (!id) return;
-        const unsubscribe = subscribeToReviews(id, (data) => {
-            setReviews(data);
-        });
-        return () => unsubscribe();
-    }, [id]);
-
-    const handleReviewSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!id) return;
-        setIsSubmitting(true);
-        try {
-            await addReview(id, newReview.userName, newReview.rating, newReview.text);
-            setNewReview({ userName: '', rating: 5, text: '' });
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-4xl animate-pulse">Loading...</div>;
     if (!product) return <div className="min-h-screen flex items-center justify-center font-display text-4xl">Rainbow Lost...</div>;
@@ -290,42 +265,16 @@ export const ProductDetail = () => {
                 </section>
 
                 {/* Reviews Section */}
-                <div className="mt-32 border-b-4 border-brand-black pb-32 max-w-4xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 font-body">
-                        <div>
-                            <h3 className="text-4xl font-display font-black italic mb-12 uppercase tracking-tighter flex items-center gap-4">
-                                <MessageSquare className="w-8 h-8 text-brand-magenta" /> Community Rituals
-                            </h3>
-                            {reviews.length === 0 ? (
-                                <p className="text-xs font-bold opacity-60 italic uppercase tracking-widest bg-brand-black/5 p-8 border-2 border-dashed border-brand-black">No rainbows shared yet. Be the first to tell their soul.</p>
-                            ) : (
-                                <div className="space-y-12">
-                                    {reviews.map((review) => (
-                                        <div key={review.id} className="border-l-4 border-brand-magenta pl-6">
-                                            <div className="flex items-center gap-1 text-brand-yellow mb-2">
-                                                {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-brand-black/10'} stroke-brand-black stroke-2`} />)}
-                                            </div>
-                                            <p className="font-bold text-lg mb-3">"{review.text}"</p>
-                                            <div className="text-[10px] font-black uppercase tracking-widest opacity-60">{review.userName} • {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Just now'}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        <div>
-                            <form onSubmit={handleReviewSubmit} className="bg-white border-4 border-brand-black p-8 shadow-[12px_12px_0px_#FFE600] space-y-6">
-                                <h4 className="text-xs font-black uppercase tracking-widest mb-4">Speak your Truth</h4>
-                                <input type="text" required value={newReview.userName} onChange={(e) => setNewReview({ ...newReview, userName: e.target.value })} className="w-full border-2 border-brand-black p-4 text-xs font-bold" placeholder="Your Name" />
-                                <div className="flex gap-2">
-                                    {[1, 2, 3, 4, 5].map(s => (
-                                        <button key={s} type="button" onClick={() => setNewReview({ ...newReview, rating: s })}><Star className={`w-6 h-6 ${s <= newReview.rating ? 'fill-brand-yellow text-brand-yellow' : 'text-brand-black/10'} stroke-brand-black stroke-2`} /></button>
-                                    ))}
-                                </div>
-                                <textarea required rows={4} value={newReview.text} onChange={(e) => setNewReview({ ...newReview, text: e.target.value })} className="w-full border-2 border-brand-black p-4 text-xs font-bold resize-none" placeholder="Experience" />
-                                <button type="submit" disabled={isSubmitting} className="w-full bg-brand-black text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-brand-magenta transition-all">Submit</button>
-                            </form>
-                        </div>
-                    </div>
+                <div className="mt-32 pb-32 max-w-4xl mx-auto">
+                    <ProductReviews
+                        productId={product.id}
+                        productName={product.name}
+                        storeId={import.meta.env.VITE_STORE_ID ?? ''}
+                        currentUser={user ? {
+                            email: user.email ?? '',
+                            name: user.displayName ?? user.email?.split('@')[0] ?? '',
+                        } : null}
+                    />
                 </div>
 
                 {/* Related Products */}
